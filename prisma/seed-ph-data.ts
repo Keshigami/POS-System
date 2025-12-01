@@ -44,13 +44,36 @@ async function main() {
     await prisma.priceHistory.deleteMany();
     await prisma.salesAnalytics.deleteMany();
     await prisma.orderItem.deleteMany();
-    await prisma.packageItem.deleteMany(); // Added
-    await prisma.package.deleteMany();     // Added
+    await prisma.packageItem.deleteMany();
+    await prisma.package.deleteMany();
     await prisma.order.deleteMany();
     await prisma.product.deleteMany();
-    await prisma.category.deleteMany();    // Added
+    await prisma.category.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.store.deleteMany(); // Added
 
-    // 2. Create Categories & Products
+    // 2. Create Main Store
+    const mainStore = await prisma.store.create({
+        data: {
+            name: 'Main Branch - Manila',
+            location: 'Manila, Philippines',
+            currency: 'PHP',
+        }
+    });
+    console.log(`✅ Created Store: ${mainStore.name}`);
+
+    // 3. Create Default User (Admin)
+    await prisma.user.create({
+        data: {
+            name: 'Admin User',
+            email: 'admin@pos.com',
+            role: 'ADMIN',
+            pin: '1234',
+            storeId: mainStore.id,
+        }
+    });
+
+    // 4. Create Categories & Products
     const products = [];
     const categoryMap = new Map();
 
@@ -59,11 +82,18 @@ async function main() {
         let categoryId = categoryMap.get(p.category);
 
         if (!categoryId) {
-            const existingCategory = await prisma.category.findFirst({ where: { name: p.category } });
+            const existingCategory = await prisma.category.findFirst({
+                where: { name: p.category, storeId: mainStore.id }
+            });
             if (existingCategory) {
                 categoryId = existingCategory.id;
             } else {
-                const newCategory = await prisma.category.create({ data: { name: p.category } });
+                const newCategory = await prisma.category.create({
+                    data: {
+                        name: p.category,
+                        storeId: mainStore.id
+                    }
+                });
                 categoryId = newCategory.id;
             }
             categoryMap.set(p.category, categoryId);
@@ -75,15 +105,15 @@ async function main() {
                 price: p.price,
                 stock: p.stock,
                 categoryId: categoryId,
+                storeId: mainStore.id,
             },
         });
         products.push(product);
     }
     console.log(`✅ Created ${products.length} local products`);
 
-    // 3. Generate 60 Days of Transaction History
+    // 5. Generate 60 Days of Transaction History
     const today = new Date();
-    const orders = [];
 
     console.log('📅 Generating 60 days of transaction history...');
 
@@ -122,6 +152,7 @@ async function main() {
                     total: 0, // Will update
                     status: 'COMPLETED',
                     paymentMethod: Math.random() > 0.7 ? 'GCASH' : 'CASH', // 30% GCash usage
+                    storeId: mainStore.id,
                 },
             });
 

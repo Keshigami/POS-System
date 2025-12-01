@@ -205,12 +205,13 @@ This project follows a phased development approach to deliver value incrementall
 - **Pricing Optimization**: Converged to optimal loss of `0.0511`
 - **Dataset**: Trained on 60 days of synthetic Philippine retail transaction history.
 
-### 📋 Phase 4: Cloud & Multi-Location (Planned)
+### 🚧 Phase 4: Cloud & Multi-Location (In Progress)
 
-- Cloud deployment options
-- Multi-store support with centralized management
-- Real-time synchronization across locations
-- Mobile app for inventory management
+- **Multi-Store Architecture**: Database schema updated to support multiple branches (`Store` model).
+- **Data Isolation**: All products, orders, and users are now linked to specific stores.
+- **Cloud Readiness**: System is ready for PostgreSQL/Supabase migration.
+- **Authentication**: Preparing for Google Login integration.
+- **Mobile App**: Planning Capacitor integration for Android APK.
 
 ### 🔮 Phase 5: Advanced Integrations (Future)
 

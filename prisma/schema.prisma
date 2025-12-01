@@ -7,19 +7,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Store {
+  id              String   @id @default(cuid())
+  name            String
+  location        String?
+  currency        String   @default("PHP")
+  users           User[]
+  products        Product[]
+  orders          Order[]
+  categories      Category[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  pin       String   @unique // Simple PIN for login
-  role      String   @default("STAFF") // ADMIN or STAFF
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  pin           String?   // Keep for quick access if needed
+  role          String    @default("STAFF") // ADMIN, MANAGER, STAFF
+  storeId       String?   // Optional for now to allow initial setup
+  store         Store?    @relation(fields: [storeId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Category {
   id        String    @id @default(cuid())
   name      String
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -32,6 +89,8 @@ model Product {
   stock        Int
   categoryId   String
   category     Category        @relation(fields: [categoryId], references: [id])
+  storeId      String
+  store        Store           @relation(fields: [storeId], references: [id])
   orderItems   OrderItem[]
   packageItems PackageItem[]
   forecasts    ForecastData[]
@@ -42,16 +101,18 @@ model Product {
 
 model Order {
   id               String      @id @default(cuid())
-  receiptNumber    Int?        @unique // Sequential receipt number
+  receiptNumber    Int?        // Per-store sequential number logic needed later
   total            Float
-  amountPaid       Float?      // Amount customer paid (for change calculation)
-  status           String      @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
-  paymentMethod    String      @default("CASH") // CASH, CARD, GCASH, PAYMAYA
-  paymentReference String?     // Transaction/Reference ID for digital payments
-  discountType     String      @default("NONE") // NONE, SENIOR_CITIZEN, PWD
+  amountPaid       Float?
+  status           String      @default("COMPLETED")
+  paymentMethod    String      @default("CASH")
+  paymentReference String?
+  discountType     String      @default("NONE")
   discountAmount   Float       @default(0)
   userId           String?
   user             User?       @relation(fields: [userId], references: [id])
+  storeId          String
+  store            Store       @relation(fields: [storeId], references: [id])
   items            OrderItem[]
   deliveryOrders   DeliveryOrder[]
   createdAt        DateTime    @default(now())
@@ -65,7 +126,7 @@ model OrderItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Float // Price at the time of sale
+  price     Float
 }
 
 model Package {
@@ -89,11 +150,11 @@ model PackageItem {
 
 model IntegrationConfig {
   id        String   @id @default(cuid())
-  provider  String   @unique // 'gcash', 'maya', 'paymaya', 'grabfood', 'foodpanda'
-  type      String   // 'payment' or 'delivery'
+  provider  String   @unique
+  type      String
   enabled   Boolean  @default(false)
-  mode      String   @default("sandbox") // 'sandbox' or 'live'
-  config    String   // JSON string for API keys, endpoints (will be encrypted)
+  mode      String   @default("sandbox")
+  config    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -102,11 +163,11 @@ model DeliveryOrder {
   id              String   @id @default(cuid())
   orderId         String
   order           Order    @relation(fields: [orderId], references: [id])
-  platform        String   // 'grabfood', 'foodpanda', 'manual'
-  externalOrderId String?  // Platform's order ID
-  status          String   @default("pending") // pending, confirmed, preparing, ready, picked_up, delivered
+  platform        String
+  externalOrderId String?
+  status          String   @default("pending")
   deliveryFee     Float?
-  platformData    String?  // JSON string for platform-specific data
+  platformData    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -117,8 +178,8 @@ model SalesAnalytics {
   totalRevenue  Float
   totalOrders   Int
   avgOrderValue Float
-  topProducts   String   // JSON array of top product IDs
-  peakHour      Int?     // Hour of day (0-23)
+  topProducts   String
+  peakHour      Int?
   createdAt     DateTime @default(now())
 }
 
@@ -128,8 +189,8 @@ model ForecastData {
   product         Product  @relation(fields: [productId], references: [id])
   forecastDate    DateTime
   predictedSales  Int
-  confidence      Float    // 0.0-1.0
-  recommendations String?  // JSON with restock suggestions
+  confidence      Float
+  recommendations String?
   createdAt       DateTime @default(now())
 }
 
@@ -139,18 +200,18 @@ model PriceHistory {
   product       Product   @relation(fields: [productId], references: [id])
   originalPrice Float
   adjustedPrice Float
-  reason        String    // 'LOW_STOCK', 'PEAK_HOURS', 'SLOW_MOVING', 'SEASONAL'
+  reason        String
   appliedAt     DateTime  @default(now())
   revertedAt    DateTime?
 }
 
 model CustomerInsight {
   id                 String   @id @default(cuid())
-  period             String   // 'daily', 'weekly', 'monthly'
+  period             String
   periodDate         DateTime
   totalCustomers     Int
   returningCustomers Int
   avgPurchaseValue   Float
-  topCombinations    String   // JSON of popular product combos
+  topCombinations    String
   createdAt          DateTime @default(now())
 }

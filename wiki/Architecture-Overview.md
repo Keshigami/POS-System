@@ -478,3 +478,58 @@ Key packages and versions:
 ---
 
 **Questions?** Open an issue on [GitHub](https://github.com/Keshigami/POS-System/issues).
+
+## Multi-Store Architecture (Phase 4)
+
+### Overview
+
+The system supports multiple physical store locations managed under a single deployment. This is achieved through a **Multi-Tenant** database design where all core entities are linked to a specific `Store`.
+
+### Data Isolation Strategy
+
+```mermaid
+graph TD
+    StoreA[Store A (Manila)]
+    StoreB[Store B (Cebu)]
+    
+    subgraph "Shared Database"
+        UserA[User: Manager A] -->|storeId| StoreA
+        UserB[User: Manager B] -->|storeId| StoreB
+        
+        ProdA[Product: Pandesal] -->|storeId| StoreA
+        ProdB[Product: Dried Mango] -->|storeId| StoreB
+        
+        OrderA[Order #101] -->|storeId| StoreA
+        OrderB[Order #205] -->|storeId| StoreB
+    end
+```
+
+### Key Components
+
+1. **Store Model**: The root entity for tenancy.
+
+    ```prisma
+    model Store {
+      id       String @id @default(cuid())
+      name     String
+      location String?
+      users    User[]
+      products Product[]
+      orders   Order[]
+    }
+    ```
+
+2. **User Association**: Users are assigned to a single store (currently).
+    - `User.storeId`: Foreign key linking staff to their branch.
+    - **Role-Based Access**:
+        - `ADMIN`: Can manage all stores (future).
+        - `MANAGER`: Can manage their specific store.
+        - `STAFF`: Can process sales in their specific store.
+
+3. **Inventory Segregation**:
+    - Products are unique to each store.
+    - Allows different pricing and stock levels per location.
+
+4. **Authentication**:
+    - **Google Login** (NextAuth.js) identifies the user.
+    - System looks up the user's `storeId` to determine context.
