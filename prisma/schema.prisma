@@ -26,16 +26,18 @@ model Category {
 }
 
 model Product {
-  id           String        @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
   price        Float
   stock        Int
   categoryId   String
-  category     Category      @relation(fields: [categoryId], references: [id])
+  category     Category        @relation(fields: [categoryId], references: [id])
   orderItems   OrderItem[]
   packageItems PackageItem[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  forecasts    ForecastData[]
+  priceHistory PriceHistory[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
 
 model Order {
@@ -107,4 +109,48 @@ model DeliveryOrder {
   platformData    String?  // JSON string for platform-specific data
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model SalesAnalytics {
+  id            String   @id @default(cuid())
+  date          DateTime
+  totalRevenue  Float
+  totalOrders   Int
+  avgOrderValue Float
+  topProducts   String   // JSON array of top product IDs
+  peakHour      Int?     // Hour of day (0-23)
+  createdAt     DateTime @default(now())
+}
+
+model ForecastData {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  forecastDate    DateTime
+  predictedSales  Int
+  confidence      Float    // 0.0-1.0
+  recommendations String?  // JSON with restock suggestions
+  createdAt       DateTime @default(now())
+}
+
+model PriceHistory {
+  id            String    @id @default(cuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  originalPrice Float
+  adjustedPrice Float
+  reason        String    // 'LOW_STOCK', 'PEAK_HOURS', 'SLOW_MOVING', 'SEASONAL'
+  appliedAt     DateTime  @default(now())
+  revertedAt    DateTime?
+}
+
+model CustomerInsight {
+  id                 String   @id @default(cuid())
+  period             String   // 'daily', 'weekly', 'monthly'
+  periodDate         DateTime
+  totalCustomers     Int
+  returningCustomers Int
+  avgPurchaseValue   Float
+  topCombinations    String   // JSON of popular product combos
+  createdAt          DateTime @default(now())
 }
