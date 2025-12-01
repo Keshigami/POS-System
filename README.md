@@ -57,7 +57,7 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Keshigami/POS-System.git
    cd pos-app
    ```
 
