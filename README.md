@@ -1,0 +1,125 @@
+# POS System with Inventory & BIR Compliance 🇵🇭
+
+A modern, web-based Point of Sale (POS) system built specifically for Philippine businesses. This application combines robust inventory management, meal package creation, and BIR-compliant receipt generation in a sleek, user-friendly interface.
+
+![POS System Screenshot](https://placehold.co/600x400?text=POS+System+Preview)
+
+## 🚀 Key Features
+
+### 🛒 Point of Sale (POS)
+- **Fast Checkout**: Quick product selection and cart management.
+- **Smart Search**: Instantly find products by name.
+- **Discounts**: Built-in support for **Senior Citizen** and **PWD** discounts (20% + VAT exemption).
+- **Payment Methods**: Support for Cash, Card, GCash, and Maya.
+
+### 📦 Inventory Management
+- **Product CRUD**: Add, edit, and delete products easily.
+- **Stock Tracking**: Real-time inventory updates with low-stock warnings.
+- **Categories**: Organize products for faster access.
+
+### 🍱 Package Management
+- **Meal Combos**: Create special deals (e.g., "Breakfast Meal", "Student Promo").
+- **Flexible Pricing**: Set custom prices for packages independent of individual item costs.
+- **Bundle Items**: Group multiple products into a single sellable unit.
+
+### 🧾 BIR Compliance
+- **Official Receipts**: Generates receipts with required BIR details.
+- **Tax Breakdown**: Automatic calculation of VAT, Vatable Sales, and VAT Exempt sales.
+- **Company Details**: Configurable TIN, Business Name, and Address on receipts.
+- **Sequential Numbering**: Auto-incrementing Order/Receipt numbers.
+
+### ⚙️ Integration Framework
+- **Payment Gateways**: Configuration ready for **GCash**, **Maya**, and **PayMaya**.
+- **Delivery Platforms**: Setup available for **GrabFood** and **foodpanda**.
+- **Sandbox Mode**: Test integrations safely before going live.
+
+### 🤖 AI Capabilities
+- **Smart Recommendations** (Implemented ✅): Suggests add-ons based on current cart items (e.g., "Customer bought Coffee, suggest Pandesal").
+- **Sales Forecasting** (Roadmap): Predict demand for specific days/times to optimize inventory.
+- **Dynamic Pricing** (Roadmap): AI-driven price adjustments for meal packages based on popularity and stock levels.
+- **Voice Commands** (Roadmap): Hands-free POS operation for busy staff.
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Database**: [SQLite](https://www.sqlite.org/) (via [Prisma ORM](https://www.prisma.io/))
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+## 🏁 Getting Started
+
+### Prerequisites
+- Node.js 18+ installed
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd pos-app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup Database**
+   ```bash
+   npx prisma db push
+   npx prisma db seed
+   ```
+
+4. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the App**
+   Visit `http://localhost:3000` in your browser.
+
+### Default Login
+- **PIN**: `1234`
+
+## 📖 Usage Guide
+
+### Making a Sale
+1. Select items from the grid or use the search bar.
+2. Click "Charge" to proceed to payment.
+3. Select payment method and enter amount (if Cash).
+4. Apply discounts (Senior/PWD) if applicable.
+5. Complete transaction to print receipt.
+
+### Managing Inventory
+1. Click the **Package Icon** (📦) in the header.
+2. Use the **Products** tab to manage individual items.
+3. Use the **Packages** tab to create meal combos.
+
+### Configuring Settings
+1. Click the **Gear Icon** (⚙️) in the header.
+2. Enable/Disable payment gateways or delivery platforms.
+3. Enter API credentials and test connections.
+
+## 📂 Project Structure
+
+```
+/app
+  /api          # Backend API routes (Next.js Route Handlers)
+  /inventory    # Inventory management page
+  /settings     # Integration settings page
+  /transactions # Transaction history page
+  page.tsx      # Main POS interface
+/components
+  /ui           # Reusable UI components (shadcn)
+  Receipt.tsx   # Receipt generation component
+/prisma
+  schema.prisma # Database schema
+  seed.ts       # Initial data seeding
+/lib            # Utility functions and Prisma client
+```
+
+## 📄 License
+
+This project is open-source and available for personal and commercial use.

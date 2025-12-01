@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  pin       String   @unique // Simple PIN for login
+  role      String   @default("STAFF") // ADMIN or STAFF
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id           String        @id @default(cuid())
+  name         String
+  price        Float
+  stock        Int
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+  packageItems PackageItem[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  receiptNumber    Int?        @unique // Sequential receipt number
+  total            Float
+  amountPaid       Float?      // Amount customer paid (for change calculation)
+  status           String      @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
+  paymentMethod    String      @default("CASH") // CASH, CARD, GCASH, PAYMAYA
+  paymentReference String?     // Transaction/Reference ID for digital payments
+  discountType     String      @default("NONE") // NONE, SENIOR_CITIZEN, PWD
+  discountAmount   Float       @default(0)
+  userId           String?
+  user             User?       @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+  deliveryOrders   DeliveryOrder[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float // Price at the time of sale
+}
+
+model Package {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  items       PackageItem[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model PackageItem {
+  id        String  @id @default(cuid())
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+}
+
+model IntegrationConfig {
+  id        String   @id @default(cuid())
+  provider  String   @unique // 'gcash', 'maya', 'paymaya', 'grabfood', 'foodpanda'
+  type      String   // 'payment' or 'delivery'
+  enabled   Boolean  @default(false)
+  mode      String   @default("sandbox") // 'sandbox' or 'live'
+  config    String   // JSON string for API keys, endpoints (will be encrypted)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveryOrder {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  platform        String   // 'grabfood', 'foodpanda', 'manual'
+  externalOrderId String?  // Platform's order ID
+  status          String   @default("pending") // pending, confirmed, preparing, ready, picked_up, delivered
+  deliveryFee     Float?
+  platformData    String?  // JSON string for platform-specific data
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
