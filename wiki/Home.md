@@ -17,7 +17,7 @@ This wiki provides detailed information about installation, usage, features, and
 
 - **[User Guide](User-Guide)** - Complete guide to using the POS system
 - **[BIR Compliance](BIR-Compliance)** - Understanding Philippine tax compliance features
-- **[AI Smart Recommendations](AI-Smart-Recommendations)** - How the AI suggestion system works
+- **[True AI & Machine Learning](AI-and-Machine-Learning)** - Neural networks for forecasting and pricing
 - **[Payment Integration](Payment-Integration)** - Setting up GCash, Maya, and other payment methods
 - **[Delivery Platforms](Delivery-Platforms)** - Integrating with GrabFood and foodpanda
 

@@ -50,12 +50,16 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 - **Delivery Platforms**: Setup available for **GrabFood** and **foodpanda**.
 - **Sandbox Mode**: Test integrations safely before going live.
 
-### 🤖 AI Capabilities
+### 🧠 True AI & Machine Learning
 
-- **Smart Recommendations** (Implemented ✅): Suggests add-ons based on current cart items (e.g., "Customer bought Coffee, suggest Pandesal").
-- **Sales Forecasting** (Roadmap): Predict demand for specific days/times to optimize inventory.
-- **Dynamic Pricing** (Roadmap): AI-driven price adjustments for meal packages based on popularity and stock levels.
-- **Voice Commands** (Roadmap): Hands-free POS operation for busy staff.
+The system features **real machine learning models** powered by **TensorFlow.js**, moving beyond simple statistical rules:
+
+- **Neural Network Forecasting** (Implemented ✅): LSTM (Long Short-Term Memory) models trained on historical sales data to predict future demand with high accuracy.
+- **ML-Based Dynamic Pricing** (Implemented ✅): Regression neural networks that optimize prices based on stock levels, sales velocity, and time factors.
+- **Smart Recommendations** (Rule-Based, ML Roadmap): Intelligent product suggestions based on cart context.
+- **Voice Commands** (Roadmap): Hands-free POS operation.
+
+> **Technical Note**: Models are trained on-device/server-side using `@tensorflow/tfjs-node`, allowing for continuous learning and privacy-preserving AI.
 
 ## 🛠️ Tech Stack
 
@@ -64,6 +68,7 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
 - **Database**: [SQLite](https://www.sqlite.org/) (via [Prisma ORM](https://www.prisma.io/))
+- **AI/ML**: [TensorFlow.js](https://www.tensorflow.org/js) (Neural Networks)
 - **Icons**: [Lucide React](https://lucide.dev/)
 
 ## 🏁 Getting Started
