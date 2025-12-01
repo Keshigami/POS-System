@@ -51,7 +51,9 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 ## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js 18+ installed
+- **Node.js 18+** installed ([Download](https://nodejs.org/))
+- **Git** installed ([Download](https://git-scm.com/))
+- A code editor like **VS Code** (Recommended)
 
 ### Installation
 
@@ -86,21 +88,32 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 ## 📖 Usage Guide
 
 ### Making a Sale
-1. Select items from the grid or use the search bar.
-2. Click "Charge" to proceed to payment.
-3. Select payment method and enter amount (if Cash).
-4. Apply discounts (Senior/PWD) if applicable.
-5. Complete transaction to print receipt.
+1. **Add Items**: Click on product cards or use the search bar to find items.
+2. **AI Suggestions**: Watch for the "Smart Suggestions" box below the cart – click the **+** button to add recommended items instantly.
+3. **Checkout**: Click "Charge" to proceed.
+4. **Payment**: Select Cash, Card, or E-Wallet.
+   - For **Cash**: Enter the amount received.
+   - For **E-Wallets**: Select the provider (GCash/Maya).
+5. **Discounts**: Select "Senior Citizen" or "PWD" to apply the 20% discount + VAT exemption.
+6. **Complete**: Click "Pay" to finalize and print the receipt.
 
 ### Managing Inventory
 1. Click the **Package Icon** (📦) in the header.
-2. Use the **Products** tab to manage individual items.
-3. Use the **Packages** tab to create meal combos.
+2. **Products Tab**: Add new items, update prices, or check stock levels.
+3. **Packages Tab**: Create meal combos (e.g., "Breakfast Meal").
+   - Click "New Package".
+   - Select items to bundle.
+   - Set a special package price.
 
-### Configuring Settings
+### Configuring Settings & Integrations
 1. Click the **Gear Icon** (⚙️) in the header.
-2. Enable/Disable payment gateways or delivery platforms.
-3. Enter API credentials and test connections.
+2. **Payment Gateways**:
+   - Toggle **GCash** or **Maya**.
+   - Enter your API Keys (or use mock keys for testing).
+   - Switch between **Sandbox** (Test) and **Live** modes.
+3. **Delivery Platforms**:
+   - Enable **GrabFood** or **foodpanda**.
+   - Configure store IDs and webhook secrets.
 
 ## 📂 Project Structure
 
