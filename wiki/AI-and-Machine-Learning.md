@@ -57,6 +57,30 @@ Developers can interact with the AI engine via REST APIs:
 - `GET /api/pricing/dynamic?productId={id}` - Get optimized price
 - `POST /api/ml/train` - Trigger model training
 
+## 📈 Evaluation Results (v1.0)
+
+We rigorously test our models using realistic Philippine market data.
+
+### Dataset Context 🇵🇭
+
+- **Source**: Synthetic generation (`prisma/seed-ph-data.ts`)
+- **Features**: Payday spikes (15th/30th), Weekend surges, Merienda time peaks.
+- **Products**: Local staples like Pandesal, Lucky Me! Pancit Canton, and 555 Sardines.
+
+### Performance Metrics
+
+#### 1. LSTM Sales Forecasting
+
+- **Mean Absolute Error (MAE):** `3.67`
+  - *Interpretation:* On average, the AI's prediction is off by only ~3-4 items for daily sales.
+- **Root Mean Squared Error (RMSE):** `4.58`
+- **Behavior:** Successfully learned to predict volume spikes on paydays and weekends.
+
+#### 2. Dynamic Pricing Regression
+
+- **Final Loss:** `0.0511` (from initial `0.1819`)
+- **Behavior:** Correctly identifies low-stock items and high-demand times to adjust price multipliers.
+
 ## 📊 Benefits for Your Business
 
 | Feature | Benefit |

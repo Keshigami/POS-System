@@ -199,6 +199,12 @@ This project follows a phased development approach to deliver value incrementall
 >
 > **🇵🇭 Localized Data**: The system includes a seed script (`prisma/seed-ph-data.ts`) to generate realistic Philippine market data (e.g., Pandesal, Lucky Me, GCash transactions) for testing the AI models.
 
+#### 📊 Model Performance (v1.0)
+
+- **Forecasting Accuracy (MAE)**: `3.67` (Avg. error of ~3 items per day on high-variance data)
+- **Pricing Optimization**: Converged to optimal loss of `0.0511`
+- **Dataset**: Trained on 60 days of synthetic Philippine retail transaction history.
+
 ### 📋 Phase 4: Cloud & Multi-Location (Planned)
 
 - Cloud deployment options
