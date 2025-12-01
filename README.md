@@ -1,6 +1,13 @@
 # POS System with Inventory & BIR Compliance 🇵🇭
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub issues](https://img.shields.io/github/issues/Keshigami/POS-System)](https://github.com/Keshigami/POS-System/issues)
+[![GitHub stars](https://img.shields.io/github/stars/Keshigami/POS-System)](https://github.com/Keshigami/POS-System/stargazers)
+[![Documentation](https://img.shields.io/badge/docs-wiki-blue)](https://github.com/Keshigami/POS-System/wiki)
+
 A modern, web-based Point of Sale (POS) system built specifically for Philippine businesses. This application combines robust inventory management, meal package creation, and BIR-compliant receipt generation in a sleek, user-friendly interface.
+
+**📖 [View Full Documentation →](https://github.com/Keshigami/POS-System/wiki)**
 
 ![POS System Demo](demo/Screen%20Recording%202025-12-01%20at%201.18.39%20PM.mov)
 
