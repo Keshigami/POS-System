@@ -2,7 +2,7 @@
 
 Welcome to the comprehensive documentation for the **POS System with Inventory & BIR Compliance** – a modern, web-based Point of Sale system built specifically for Philippine businesses.
 
-![POS System Demo](../demo/Screen%20Recording%202025-12-01%20at%201.18.39%20PM.mov)
+![POS System Demo](https://raw.githubusercontent.com/Keshigami/POS-System/main/demo/pos-demo.mov)
 
 ## 📚 Documentation Overview
 
