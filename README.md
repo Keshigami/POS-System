@@ -195,6 +195,8 @@ This project follows a phased development approach to deliver value incrementall
 - **REST APIs** - `/api/analytics`, `/api/forecast`, `/api/ml/train`, `/api/insights`
 
 > **Note**: This uses actual neural networks (LSTM + regression) that learn from data and improve over time, not simple rule-based logic.
+>
+> **🇵🇭 Localized Data**: The system includes a seed script (`prisma/seed-ph-data.ts`) to generate realistic Philippine market data (e.g., Pandesal, Lucky Me, GCash transactions) for testing the AI models.
 
 ### 📋 Phase 4: Cloud & Multi-Location (Planned)
 

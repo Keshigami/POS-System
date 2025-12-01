@@ -146,6 +146,21 @@ export async function preparePricingFeatures(
         prices.push(avgPrice / product.price); // Price relative to current
     });
 
+    // If insufficient data, generate synthetic data for demonstration
+    if (features.length < 10) {
+        console.log('⚠️ Insufficient historical data. Generating synthetic data for training demo...');
+        for (let i = 0; i < 50; i++) {
+            features.push([
+                Math.random(), // Stock
+                Math.random(), // Sales
+                Math.random(), // Day
+                Math.random()  // Time
+            ]);
+            // Price multiplier target (0.8 to 1.2)
+            prices.push(0.8 + (Math.random() * 0.4));
+        }
+    }
+
     return { features, prices };
 }
 

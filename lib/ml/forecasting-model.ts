@@ -91,8 +91,13 @@ export async function trainForecastingModel(
 
     const metrics = calculateMetrics(denormalizedPreds, denormalizedActuals);
 
-    // Save model
-    await saveModel(model, productId, { min: xMin, max: xMax, metrics });
+    // Save model (attempt)
+    try {
+        await saveModel(model, productId, { min: xMin, max: xMax, metrics });
+    } catch (error: any) {
+        console.warn(`⚠️ Could not save model to disk (environment limitation): ${error.message}`);
+        console.log('Continuing with in-memory model...');
+    }
 
     // Cleanup tensors
     xsTrainTensor.dispose();

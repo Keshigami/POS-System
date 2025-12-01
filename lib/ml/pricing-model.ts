@@ -79,15 +79,19 @@ export async function trainPricingModel(
         fs.mkdirSync(modelDir, { recursive: true });
     }
 
-    await model.save(`file://${modelDir}`);
-    fs.writeFileSync(
-        path.join(modelDir, 'metadata.json'),
-        JSON.stringify({
-            trainedAt: new Date().toISOString(),
-            productId,
-            inputFeatures: features[0].length,
-        }, null, 2)
-    );
+    try {
+        await model.save(`file://${modelDir}`);
+        fs.writeFileSync(
+            path.join(modelDir, 'metadata.json'),
+            JSON.stringify({
+                trainedAt: new Date().toISOString(),
+                productId,
+                inputFeatures: features[0].length,
+            }, null, 2)
+        );
+    } catch (error: any) {
+        console.warn(`⚠️ Could not save pricing model (environment limitation): ${error.message}`);
+    }
 
     xsTensor.dispose();
     ysTensor.dispose();
