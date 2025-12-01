@@ -9,7 +9,11 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 **📖 [View Full Documentation →](https://github.com/Keshigami/POS-System/wiki)**
 
-![POS System Demo](demo/Screen%20Recording%202025-12-01%20at%201.18.39%20PM.mov)
+## 🎥 Demo
+
+<video src="https://github.com/Keshigami/POS-System/assets/demo/Screen%20Recording%202025-12-01%20at%201.18.39%20PM.mov" controls></video>
+
+> **Note**: If the video doesn't play above, you can [download the demo](demo/Screen%20Recording%202025-12-01%20at%201.18.39%20PM.mov) or view it directly in the repository.
 
 ## 🚀 Key Features
 
