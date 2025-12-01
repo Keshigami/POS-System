@@ -1,4 +1,5 @@
 import prisma from '../prisma';
+import { predictSales } from '../ml/forecasting-model';
 
 interface ForecastResult {
     productId: string;
@@ -6,15 +7,68 @@ interface ForecastResult {
     predictedSales: number;
     confidence: number;
     recommendations?: string;
+    method: 'ML' | 'Statistical';
 }
 
 /**
  * Generate sales forecast for a product based on historical data
- * Uses simple moving average for trend analysis
+ * Uses ML model if available, otherwise falls back to moving average
  */
 export async function forecastProductSales(
     productId: string,
     daysAhead: number = 7
+): Promise<ForecastResult[]> {
+
+    // Try ML prediction first
+    const mlPrediction = await predictSales(productId, daysAhead);
+
+    if (mlPrediction) {
+        return generateMLForecasts(productId, mlPrediction, daysAhead);
+    }
+
+    // Fallback to statistical method
+    return generateStatisticalForecasts(productId, daysAhead);
+}
+
+async function generateMLForecasts(
+    productId: string,
+    mlPrediction: { predictions: number[]; confidence: number },
+    daysAhead: number
+): Promise<ForecastResult[]> {
+    const forecasts: ForecastResult[] = [];
+    const today = new Date();
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+
+    for (let i = 0; i < daysAhead; i++) {
+        const forecastDate = new Date(today);
+        forecastDate.setDate(forecastDate.getDate() + i + 1);
+        const predicted = mlPrediction.predictions[i];
+
+        let recommendations = '';
+        if (product) {
+            const projectedStock = product.stock - mlPrediction.predictions.slice(0, i + 1).reduce((a, b) => a + b, 0);
+            if (projectedStock < 10) {
+                const suggestedRestock = Math.ceil(mlPrediction.predictions.reduce((a, b) => a + b, 0));
+                recommendations = `ML Alert: Projected stock (${projectedStock}) running low. Suggest restocking ${suggestedRestock} units.`;
+            }
+        }
+
+        forecasts.push({
+            productId,
+            forecastDate,
+            predictedSales: predicted,
+            confidence: mlPrediction.confidence,
+            recommendations: recommendations || undefined,
+            method: 'ML',
+        });
+    }
+
+    return forecasts;
+}
+
+async function generateStatisticalForecasts(
+    productId: string,
+    daysAhead: number
 ): Promise<ForecastResult[]> {
     // Get historical sales data for the last 30 days
     const thirtyDaysAgo = new Date();
@@ -86,6 +140,7 @@ export async function forecastProductSales(
             predictedSales: predicted,
             confidence: Number(confidence.toFixed(2)),
             recommendations: recommendations || undefined,
+            method: 'Statistical',
         });
     }
 
