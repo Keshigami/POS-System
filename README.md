@@ -2,7 +2,7 @@
 
 A modern, web-based Point of Sale (POS) system built specifically for Philippine businesses. This application combines robust inventory management, meal package creation, and BIR-compliant receipt generation in a sleek, user-friendly interface.
 
-![POS System Screenshot](https://placehold.co/600x400?text=POS+System+Preview)
+![POS System Screenshot](public/pos-preview.png)
 
 ## 🚀 Key Features
 
