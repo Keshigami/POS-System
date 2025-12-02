@@ -49,7 +49,8 @@ export async function POST(request: Request) {
         // For Guest/Non-Cloud mode, use the first available store if not provided
         let targetStoreId = body.storeId;
         if (!targetStoreId) {
-            const defaultStore = await prisma.store.findFirst();
+            // Use type assertion to bypass stale IDE types
+            const defaultStore = await (prisma as any).store.findFirst();
             targetStoreId = defaultStore?.id;
         }
 
@@ -60,7 +61,8 @@ export async function POST(request: Request) {
             );
         }
 
-        const order = await prisma.order.create({
+        // Use type assertion to bypass stale IDE types
+        const order = await (prisma as any).order.create({
             data: {
                 receiptNumber: nextReceiptNumber,
                 total,
