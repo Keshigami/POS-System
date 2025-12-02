@@ -287,16 +287,16 @@ This project follows a phased development approach to deliver value incrementall
 
 #### 📊 Model Performance (Latest)
 
-##### Forecasting Model (v1.0)
+##### Forecasting - Performance Summary
 
 - **MAE**: 3.67 items/day | **RMSE**: 5.23 | **MAPE**: 24.8%
 - **Dataset**: 60 days of synthetic Philippine retail transaction history
 
-##### Pricing Model (v1.0)
+##### Pricing - Performance Summary
 
 - **Loss**: 0.0511 (converged) | **Revenue Impact**: +12% vs static pricing (simulated)
 
-##### Collaborative Filtering (v1.0)
+##### Collaborative Filtering - Performance Summary
 
 - **Training Loss**: 0.15 | **Validation Loss**: 0.18
 - **Dataset**: 500+ user-product interactions
