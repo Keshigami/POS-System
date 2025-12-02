@@ -28,6 +28,7 @@ interface Product {
     id: string;
     name: string;
     price: number;
+    costPrice: number;
     stock: number;
     categoryId: string;
     category: {
@@ -75,6 +76,8 @@ export default function InventoryPage() {
     const [productFormData, setProductFormData] = useState({
         name: "",
         price: "",
+        costPrice: "",
+        margin: "",
         stock: "",
         categoryId: "",
     });
@@ -137,9 +140,17 @@ export default function InventoryPage() {
     const handleOpenProductModal = (product?: Product) => {
         if (product) {
             setEditingProduct(product);
+            // Calculate margin if cost exists
+            let margin = "";
+            if (product.price > 0 && product.costPrice > 0) {
+                margin = (((product.price - product.costPrice) / product.price) * 100).toFixed(1);
+            }
+
             setProductFormData({
                 name: product.name,
                 price: product.price.toString(),
+                costPrice: product.costPrice?.toString() || "",
+                margin: margin,
                 stock: product.stock.toString(),
                 categoryId: product.categoryId,
             });
@@ -148,6 +159,8 @@ export default function InventoryPage() {
             setProductFormData({
                 name: "",
                 price: "",
+                costPrice: "",
+                margin: "",
                 stock: "",
                 categoryId: categories[0]?.id || "",
             });
@@ -318,8 +331,8 @@ export default function InventoryPage() {
                 <div className="flex gap-2 border-b">
                     <button
                         className={`px-4 py-2 font-medium transition-colors ${activeTab === "products"
-                                ? "border-b-2 border-primary text-primary"
-                                : "text-muted-foreground hover:text-foreground"
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                             }`}
                         onClick={() => setActiveTab("products")}
                     >
@@ -330,8 +343,8 @@ export default function InventoryPage() {
                     </button>
                     <button
                         className={`px-4 py-2 font-medium transition-colors ${activeTab === "packages"
-                                ? "border-b-2 border-primary text-primary"
-                                : "text-muted-foreground hover:text-foreground"
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                             }`}
                         onClick={() => setActiveTab("packages")}
                     >
@@ -515,13 +528,82 @@ export default function InventoryPage() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="price">Price (₱)</Label>
+                                    <Label htmlFor="costPrice">Cost Price (₱)</Label>
+                                    <Input
+                                        id="costPrice"
+                                        type="number"
+                                        step="0.01"
+                                        value={productFormData.costPrice}
+                                        onChange={(e) => {
+                                            const cost = parseFloat(e.target.value);
+                                            const margin = parseFloat(productFormData.margin);
+                                            let newPrice = productFormData.price;
+
+                                            if (!isNaN(cost) && !isNaN(margin) && margin < 100) {
+                                                // Price = Cost / (1 - Margin%)
+                                                newPrice = (cost / (1 - (margin / 100))).toFixed(2);
+                                            }
+
+                                            setProductFormData({
+                                                ...productFormData,
+                                                costPrice: e.target.value,
+                                                price: newPrice
+                                            });
+                                        }}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="margin">Margin (%)</Label>
+                                    <Input
+                                        id="margin"
+                                        type="number"
+                                        step="0.1"
+                                        value={productFormData.margin}
+                                        onChange={(e) => {
+                                            const margin = parseFloat(e.target.value);
+                                            const cost = parseFloat(productFormData.costPrice);
+                                            let newPrice = productFormData.price;
+
+                                            if (!isNaN(cost) && !isNaN(margin) && margin < 100) {
+                                                // Price = Cost / (1 - Margin%)
+                                                newPrice = (cost / (1 - (margin / 100))).toFixed(2);
+                                            }
+
+                                            setProductFormData({
+                                                ...productFormData,
+                                                margin: e.target.value,
+                                                price: newPrice
+                                            });
+                                        }}
+                                        placeholder="20"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="price">Selling Price (₱)</Label>
                                     <Input
                                         id="price"
                                         type="number"
                                         step="0.01"
                                         value={productFormData.price}
-                                        onChange={(e) => setProductFormData({ ...productFormData, price: e.target.value })}
+                                        onChange={(e) => {
+                                            const price = parseFloat(e.target.value);
+                                            const cost = parseFloat(productFormData.costPrice);
+                                            let newMargin = productFormData.margin;
+
+                                            if (!isNaN(price) && !isNaN(cost) && price > 0) {
+                                                // Margin = (Price - Cost) / Price * 100
+                                                newMargin = (((price - cost) / price) * 100).toFixed(1);
+                                            }
+
+                                            setProductFormData({
+                                                ...productFormData,
+                                                price: e.target.value,
+                                                margin: newMargin
+                                            });
+                                        }}
                                         required
                                     />
                                 </div>

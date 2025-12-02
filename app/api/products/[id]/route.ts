@@ -7,14 +7,15 @@ export async function PUT(
 ) {
     try {
         const body = await request.json();
-        const { name, price, stock, categoryId } = body;
+        const { name, price, costPrice, stock, categoryId } = body;
 
         const product = await prisma.product.update({
             where: { id: params.id },
             data: {
                 name,
                 price: parseFloat(price),
-                stock: parseInt(stock) || 0,
+                costPrice: parseFloat(costPrice || 0),
+                stock: parseInt(stock),
                 categoryId,
             },
         });

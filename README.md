@@ -19,24 +19,48 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 ## 🚀 Key Features
 
+> **Latest Updates (December 2, 2025)**:
+>
+> - ✨ **Business Type Selection**: Customize POS for 8 different SME types
+> - 💰 **Cost-Plus Pricing**: Auto-calculate selling prices from cost + margin
+> - 📊 **AI Cost Forecasting**: Predict supplier price changes with ML
+> - 💳 **Configurable Service Charges**: Set custom fees per business type
+
+### 🏪 Business Type Customization
+
+- **8 SME Business Types**: Sari-Sari Store, F&B, Bakery, Pharmacy, Mini Grocery, Hardware, Vape Shop, General
+- **Type-Specific Categories**: Automatic categories based on business type
+- **Smart Product Seeding**: Pre-populated products relevant to your business
+- **Custom Charges**: Service charge (F&B 10%), Professional fee (Pharmacy 5%, Hardware 3%)
+
 ### 🛒 Point of Sale (POS)
 
 - **Fast Checkout**: Quick product selection and cart management.
 - **Smart Search**: Instantly find products by name.
 - **Discounts**: Built-in support for **Senior Citizen** and **PWD** discounts (20% + VAT exemption).
-- **Payment Methods**: Support for Cash, Card, GCash, and Maya.
+- **Payment Methods**: Support for Cash, Card, GCash, and PayMaya.
+- **Business-Specific Charges**: Auto-apply service charges or professional fees
 
 ### 📦 Inventory Management
 
 - **Product CRUD**: Add, edit, and delete products easily.
+- **Cost-Plus Pricing**: Enter cost price and margin, selling price auto-calculates
 - **Stock Tracking**: Real-time inventory updates with low-stock warnings.
 - **Categories**: Organize products for faster access.
+- **Cost Price History**: Track supplier price changes over time
 
 ### 🍱 Package Management
 
-- **Meal Combos**: Create special deals (e.g., "Breakfast Meal", "Student Promo").
-- **Flexible Pricing**: Set custom prices for packages independent of individual item costs.
-- **Bundle Items**: Group multiple products into a single sellable unit.
+- **Meal Combos**: Create package deals (e.g., "Breakfast Combo").
+- **Dynamic Pricing**: Auto-calculate package totals based on components.
+- **Stock Management**: Automatically adjust inventory when packages are sold.
+
+### 📊 Analytics Dashboard
+
+- **Sales Trends**: Daily, weekly, and monthly sales visualizations.
+- **Top Products**: See best-selling items at a glance.
+- **Revenue Tracking**: Monitor total sales and profit margins.
+- **Inventory Alerts**: Low-stock notifications and reorder suggestions.
 
 ### 🧾 BIR Compliance
 
@@ -47,7 +71,7 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 ### ⚙️ Integration Framework
 
-- **Payment Gateways**: Configuration ready for **GCash**, **Maya**, and **PayMaya**.
+- **Payment Gateways**: Configuration ready for **GCash** and **PayMaya**.
 - **Delivery Platforms**: Setup available for **GrabFood** and **foodpanda**.
 - **Sandbox Mode**: Test integrations safely before going live.
 
@@ -58,7 +82,14 @@ The system features **real machine learning models** powered by **TensorFlow.js*
 - **Neural Network Forecasting** (Implemented ✅): LSTM (Long Short-Term Memory) models trained on historical sales data to predict future demand with high accuracy.
 - **ML-Based Dynamic Pricing** (Implemented ✅): Regression neural networks that optimize prices based on stock levels, sales velocity, and time factors.
 - **Collaborative Filtering** (Implemented ✅): Matrix factorization for personalized product recommendations based on purchase history.
-- **Voice Commands** (Roadmap): Hands-free POS operation.
+- **Cost Price Forecasting** (Backend Ready ✅): LSTM models to predict supplier price changes and optimize purchasing decisions.
+
+**Why it's "True AI":**
+
+- Uses actual neural networks (not if-else rules)
+- Trains on your business data
+- Improves accuracy over time
+- Provides confidence scores for predictions
 
 > **Technical Note**: Models are trained on-device/server-side using `@tensorflow/tfjs-node`, allowing for continuous learning and privacy-preserving AI.
 
@@ -209,7 +240,7 @@ npm run dev
 3. **Checkout**: Click "Charge" to proceed.
 4. **Payment**: Select Cash, Card, or E-Wallet.
    - For **Cash**: Enter the amount received.
-   - For **E-Wallets**: Select the provider (GCash/Maya).
+   - For **E-Wallets**: Select the provider (GCash/PayMaya).
 5. **Discounts**: Select "Senior Citizen" or "PWD" to apply the 20% discount + VAT exemption.
 6. **Complete**: Click "Pay" to finalize and print the receipt.
 
@@ -226,7 +257,7 @@ npm run dev
 
 1. Click the **Gear Icon** (⚙️) in the header.
 2. **Payment Gateways**:
-   - Toggle **GCash** or **Maya**.
+   - Toggle **GCash** or **PayMaya**.
    - Enter your API Keys (or use mock keys for testing).
    - Switch between **Sandbox** (Test) and **Live** modes.
 3. **Delivery Platforms**:

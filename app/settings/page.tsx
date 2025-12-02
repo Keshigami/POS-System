@@ -25,9 +25,15 @@ interface ProviderStatus {
 
 export default function SettingsPage() {
     const router = useRouter();
-    const [activeSection, setActiveSection] = useState<"payments" | "delivery">("payments");
+    const [activeSection, setActiveSection] = useState<"payments" | "delivery" | "charges">("payments");
     const [integrations, setIntegrations] = useState<IntegrationConfig[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Service charge settings
+    const [serviceChargeEnabled, setServiceChargeEnabled] = useState(false);
+    const [serviceChargeLabel, setServiceChargeLabel] = useState("Service Charge");
+    const [serviceChargePercentage, setServiceChargePercentage] = useState(0);
+    const [serviceChargeSaving, setServiceChargeSaving] = useState(false);
 
     // Provider-specific form states
     const [providerStates, setProviderStates] = useState<Record<string, ProviderStatus>>({});
@@ -320,8 +326,8 @@ export default function SettingsPage() {
                     {state.testResult && (
                         <div
                             className={`flex items-center gap-2 p-3 rounded-md ${state.testResult.success
-                                    ? "bg-green-50 text-green-700"
-                                    : "bg-red-50 text-red-700"
+                                ? "bg-green-50 text-green-700"
+                                : "bg-red-50 text-red-700"
                                 }`}
                         >
                             {state.testResult.success ? (
@@ -368,8 +374,8 @@ export default function SettingsPage() {
                 <div className="flex gap-2 border-b">
                     <button
                         className={`px-4 py-2 font-medium transition-colors ${activeSection === "payments"
-                                ? "border-b-2 border-primary text-primary"
-                                : "text-muted-foreground hover:text-foreground"
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                             }`}
                         onClick={() => setActiveSection("payments")}
                     >
@@ -380,8 +386,8 @@ export default function SettingsPage() {
                     </button>
                     <button
                         className={`px-4 py-2 font-medium transition-colors ${activeSection === "delivery"
-                                ? "border-b-2 border-primary text-primary"
-                                : "text-muted-foreground hover:text-foreground"
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                             }`}
                         onClick={() => setActiveSection("delivery")}
                     >

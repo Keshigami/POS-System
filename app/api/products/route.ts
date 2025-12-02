@@ -20,21 +20,35 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, price, stock, categoryId } = body;
+        const { name, price, costPrice, stock, categoryId, storeId } = body;
 
-        if (!name || !price || !categoryId) {
+        if (!name || !price || !stock || !categoryId) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
             );
         }
 
+        // Get default store if not provided (for now)
+        let targetStoreId = storeId;
+        if (!targetStoreId) {
+            const defaultStore = await prisma.store.findFirst();
+            if (defaultStore) {
+                targetStoreId = defaultStore.id;
+            } else {
+                // Fallback or error - for now let's assume seed ran
+                return NextResponse.json({ error: "No store found" }, { status: 500 });
+            }
+        }
+
         const product = await prisma.product.create({
             data: {
                 name,
                 price: parseFloat(price),
-                stock: parseInt(stock) || 0,
+                costPrice: parseFloat(costPrice || 0),
+                stock: parseInt(stock),
                 categoryId,
+                storeId: targetStoreId,
             },
         });
 
