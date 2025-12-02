@@ -108,8 +108,32 @@ The system features **real machine learning models** powered by **TensorFlow.js*
    npm run dev
    ```
 
-5. **Open the App**
-   Visit `http://localhost:3000` in your browser.
+5. **Access the application**
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🏠 Local Development (Offline-First)
+
+This POS system is designed to work **completely offline** using SQLite:
+
+```bash
+# Start the development server
+npm run dev
+
+# Access at http://localhost:3000
+```
+
+**Key Features in Local Mode:**
+
+- ✅ No internet required after initial setup
+- ✅ All data stored locally in `prisma/dev.db`
+- ✅ AI/ML models run entirely on your machine
+- ✅ Guest checkout (no login needed)
+- ✅ Full POS functionality
+
+**To build Android APK locally:** See [ANDROID_BUILD.md](ANDROID_BUILD.md)
+
+**To deploy to cloud:** See [VERCEL_GUIDE.md](VERCEL_GUIDE.md)
 
 ### Default Login
 
