@@ -46,6 +46,20 @@ export async function POST(request: Request) {
 
         const nextReceiptNumber = (lastOrder?.receiptNumber || 0) + 1;
 
+        // For Guest/Non-Cloud mode, use the first available store if not provided
+        let targetStoreId = body.storeId;
+        if (!targetStoreId) {
+            const defaultStore = await prisma.store.findFirst();
+            targetStoreId = defaultStore?.id;
+        }
+
+        if (!targetStoreId) {
+            return NextResponse.json(
+                { error: "No store found. Please seed the database." },
+                { status: 400 }
+            );
+        }
+
         const order = await prisma.order.create({
             data: {
                 receiptNumber: nextReceiptNumber,
@@ -55,7 +69,9 @@ export async function POST(request: Request) {
                 amountPaid,
                 discountType,
                 discountAmount,
+                discountAmount,
                 userId: userId || null,
+                storeId: targetStoreId,
                 status: "COMPLETED",
                 items: {
                     create: items.map((item: any) => ({
