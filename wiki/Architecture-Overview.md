@@ -31,7 +31,7 @@ graph TB
 
 ## Project Structure
 
-```
+```text
 pos-app/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # Backend API routes
@@ -161,7 +161,7 @@ erDiagram
 
 ### Component Hierarchy
 
-```
+```text
 App Layout
 ├── Header
 │   ├── Logo
@@ -222,7 +222,7 @@ const addToCart = (product: Product) => {
 
 All API routes follow Next.js App Router conventions:
 
-```
+```text
 /app/api/[resource]/route.ts
 ```
 
