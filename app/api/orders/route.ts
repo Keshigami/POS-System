@@ -69,7 +69,6 @@ export async function POST(request: Request) {
                 amountPaid,
                 discountType,
                 discountAmount,
-                discountAmount,
                 userId: userId || null,
                 storeId: targetStoreId,
                 status: "COMPLETED",
