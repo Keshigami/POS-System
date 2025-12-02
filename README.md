@@ -66,7 +66,7 @@ The system features **real machine learning models** powered by **TensorFlow.js*
 
 The system includes three trainable neural networks. Train them after accumulating transaction data:
 
-**1. Forecasting Model (Sales Prediction)**
+##### 1. Forecasting Model (Sales Prediction)
 
 ```bash
 curl -X POST http://localhost:3000/api/ml/train \
@@ -74,7 +74,7 @@ curl -X POST http://localhost:3000/api/ml/train \
   -d '{"model": "forecasting", "epochs": 100}'
 ```
 
-**2. Pricing Model (Price Optimization)**
+##### 2. Pricing Model (Price Optimization)
 
 ```bash
 curl -X POST http://localhost:3000/api/ml/train \
@@ -82,7 +82,7 @@ curl -X POST http://localhost:3000/api/ml/train \
   -d '{"model": "pricing", "epochs": 50}'
 ```
 
-**3. Collaborative Filtering (Personalized Recommendations)**
+##### 3. Collaborative Filtering (Personalized Recommendations)
 
 ```bash
 curl -X POST http://localhost:3000/api/ml/train-cf \
@@ -90,13 +90,13 @@ curl -X POST http://localhost:3000/api/ml/train-cf \
   -d '{"epochs": 50}'
 ```
 
-**Requirements:**
+##### Requirements
 
 - Forecasting: Minimum 30 days of transaction history
 - Pricing: Minimum 30 days with price variations
 - Collaborative Filtering: Minimum 50 user-product interactions
 
-**View Model Performance:**
+##### View Model Performance
 
 ```bash
 curl http://localhost:3000/api/ml/train
@@ -104,19 +104,19 @@ curl http://localhost:3000/api/ml/train
 
 #### 📊 Current Model Evaluations
 
-**Forecasting Model (v1.0)**
+##### Forecasting Model (v1.0)
 
 - **MAE (Mean Absolute Error)**: 3.67 items/day
 - **RMSE**: 5.23 items/day
 - **MAPE**: 24.8%
 - **Dataset**: 60 days of Philippine retail data (Pandesal, Lucky Me, etc.)
 
-**Pricing Model (v1.0)**
+##### Pricing Model (v1.0)
 
 - **Loss**: 0.0511 (converged)
 - **Revenue Impact**: +12% vs static pricing (simulated)
 
-**Collaborative Filtering (v1.0)**
+##### Collaborative Filtering (v1.0)
 
 - **Training Loss**: ~0.15 (after 50 epochs)
 - **Validation Loss**: ~0.18
@@ -287,16 +287,16 @@ This project follows a phased development approach to deliver value incrementall
 
 #### 📊 Model Performance (Latest)
 
-**Forecasting Model (v1.0)**
+##### Forecasting Model (v1.0)
 
 - **MAE**: 3.67 items/day | **RMSE**: 5.23 | **MAPE**: 24.8%
 - **Dataset**: 60 days of synthetic Philippine retail transaction history
 
-**Pricing Model (v1.0)**
+##### Pricing Model (v1.0)
 
 - **Loss**: 0.0511 (converged) | **Revenue Impact**: +12% vs static pricing (simulated)
 
-**Collaborative Filtering (v1.0)**
+##### Collaborative Filtering (v1.0)
 
 - **Training Loss**: 0.15 | **Validation Loss**: 0.18
 - **Dataset**: 500+ user-product interactions
