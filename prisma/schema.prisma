@@ -20,6 +20,7 @@ model Store {
   products                Product[]
   orders                  Order[]
   categories              Category[]
+  shifts                  Shift[]
   createdAt               DateTime     @default(now())
   updatedAt               DateTime     @updatedAt
 }
@@ -64,6 +65,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
+  shifts        Shift[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -119,6 +121,8 @@ model Order {
   user             User?       @relation(fields: [userId], references: [id])
   storeId          String
   store            Store       @relation(fields: [storeId], references: [id])
+  shiftId          String?
+  shift            Shift?      @relation(fields: [shiftId], references: [id])
   items            OrderItem[]
   deliveryOrders   DeliveryOrder[]
   createdAt        DateTime    @default(now())
@@ -230,4 +234,23 @@ model CostPriceHistory {
   recordedAt DateTime @default(now())
   source     String   @default("MANUAL")
   notes      String?
+}
+
+model Shift {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  storeId      String
+  store        Store    @relation(fields: [storeId], references: [id])
+  startCash    Float
+  endCash      Float?
+  expectedCash Float?
+  variance     Float?
+  status       String   @default("OPEN") // OPEN, CLOSED
+  startTime    DateTime @default(now())
+  endTime      DateTime?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
 }

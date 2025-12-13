@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { Search, ShoppingCart, Trash2, Plus, Minus, LogOut, Zap, CreditCard, Wallet, Smartphone, Package as PackageIcon, History, Settings, Sparkles } from "lucide-react";
+import { Search, ShoppingCart, Trash2, Plus, Minus, LogOut, Zap, CreditCard, Wallet, Smartphone, Package as PackageIcon, History, Settings, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Receipt } from "@/components/Receipt";
+import { OpenShiftModal } from "@/components/OpenShiftModal";
+import { CloseShiftModal } from "@/components/CloseShiftModal";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -110,6 +112,32 @@ export default function POSPage() {
     const [showPayment, setShowPayment] = useState(false);
     const [completedOrder, setCompletedOrder] = useState<any>(null);
 
+    // Shift management
+    const [currentShift, setCurrentShift] = useState<any>(null);
+    const [showOpenShift, setShowOpenShift] = useState(false);
+    const [showCloseShift, setShowCloseShift] = useState(false);
+    const [loadingShift, setLoadingShift] = useState(true);
+
+    // Fetch current shift on mount
+    useEffect(() => {
+        fetchCurrentShift();
+    }, []);
+
+    const fetchCurrentShift = async () => {
+        try {
+            const res = await fetch("/api/shifts");
+            const shift = await res.json();
+            setCurrentShift(shift);
+            if (!shift) {
+                setShowOpenShift(true);
+            }
+        } catch (error) {
+            console.error("Failed to fetch shift", error);
+        } finally {
+            setLoadingShift(false);
+        }
+    };
+
     const categories = ["All", ...Array.from(new Set(products?.map((p) => p.category.name) || []))];
     const popularItems = products?.slice(0, 10) || [];
 
@@ -206,6 +234,7 @@ export default function POSPage() {
                     discountType,
                     discountAmount: discount,
                     userId: null,
+                    shiftId: currentShift?.id || null,
                 }),
             });
 
@@ -245,6 +274,17 @@ export default function POSPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {currentShift && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowCloseShift(true)}
+                                className="text-xs"
+                            >
+                                <Clock className="h-4 w-4 mr-1" />
+                                Close Shift
+                            </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => router.push("/inventory")} title="Inventory">
                             <PackageIcon className="h-5 w-5" />
                         </Button>
@@ -591,6 +631,33 @@ export default function POSPage() {
                     order={completedOrder}
                     onClose={() => setCompletedOrder(null)}
                 />
+            )}
+            {/* Shift Modals */}
+            {!loadingShift && (
+                <>
+                    <OpenShiftModal
+                        isOpen={showOpenShift}
+                        onClose={() => setShowOpenShift(false)}
+                        onShiftOpened={() => {
+                            fetchCurrentShift();
+                            setShowOpenShift(false);
+                        }}
+                        userId="default-user-id"
+                        storeId="default-store-id"
+                    />
+                    {currentShift && (
+                        <CloseShiftModal
+                            isOpen={showCloseShift}
+                            onClose={() => setShowCloseShift(false)}
+                            onShiftClosed={() => {
+                                setCurrentShift(null);
+                                setShowCloseShift(false);
+                                setShowOpenShift(true);
+                            }}
+                            shift={currentShift}
+                        />
+                    )}
+                </>
             )}
         </div>
     );
