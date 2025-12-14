@@ -14,6 +14,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 interface Order {
     id: string;
     total: number;
+    status: string;
     paymentMethod: string;
     paymentReference?: string;
     discountType: string;
@@ -36,6 +37,25 @@ export default function TransactionsPage() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [paymentFilter, setPaymentFilter] = useState<string>("ALL");
+    const [isRefunding, setIsRefunding] = useState<string | null>(null);
+
+    const handleRefund = async (orderId: string) => {
+        if (!confirm("Are you sure you want to refund this order? Stock will be restored.")) return;
+        setIsRefunding(orderId);
+        try {
+            const res = await fetch(`/api/orders/${orderId}/refund`, { method: "POST" });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Refund failed");
+            }
+            alert("Order refunded successfully. Stock restored.");
+            // SWR will refresh automatically
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsRefunding(null);
+        }
+    };
 
     const filteredOrders = orders
         ?.filter((order) => {
@@ -132,11 +152,11 @@ export default function TransactionsPage() {
                             GCash
                         </Button>
                         <Button
-                            variant={paymentFilter === "PAYMAYA" ? "default" : "outline"}
-                            onClick={() => setPaymentFilter("PAYMAYA")}
+                            variant={paymentFilter === "MAYA" ? "default" : "outline"}
+                            onClick={() => setPaymentFilter("MAYA")}
                             size="sm"
                         >
-                            PayMaya
+                            Maya
                         </Button>
                     </div>
                 </div>
@@ -169,6 +189,11 @@ export default function TransactionsPage() {
                                                         {order.discountType === "SENIOR_CITIZEN" ? "Senior" : "PWD"}
                                                     </span>
                                                 )}
+                                                {order.status === "REFUNDED" && (
+                                                    <span className="px-2 py-1 text-xs rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">
+                                                        REFUNDED
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className="text-sm text-muted-foreground mb-2">
                                                 {order.items.map((item, i) => (
@@ -187,9 +212,23 @@ export default function TransactionsPage() {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xl font-bold text-primary">₱{order.total.toFixed(2)}</p>
-                                            <Button size="sm" variant="outline" className="mt-2">
+                                            <Button size="sm" variant="outline" className="mt-2" onClick={() => setSelectedOrder(order)}>
                                                 View Receipt
                                             </Button>
+                                            {order.status !== "REFUNDED" && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    className="mt-2 ml-2"
+                                                    disabled={isRefunding === order.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRefund(order.id);
+                                                    }}
+                                                >
+                                                    {isRefunding === order.id ? "Refunding..." : "Refund"}
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 </CardContent>

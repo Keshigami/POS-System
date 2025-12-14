@@ -33,23 +33,49 @@ export async function GET(
             );
         }
 
-        // Calculate totals
-        const totalSales = shift.orders.reduce((sum: number, order: any) => sum + order.total, 0);
-        const totalOrders = shift.orders.length;
+        // 2. Aggregate sales by payment method from the new Payment model
+        // We need to fetch all payments associated with orders in this shift
+        // OR we can group the orders' payments.
 
-        // By payment method
-        const cashSales = shift.orders
-            .filter((o: any) => o.paymentMethod === 'CASH')
-            .reduce((sum: number, o: any) => sum + o.total, 0);
-        const cardSales = shift.orders
-            .filter((o: any) => o.paymentMethod === 'CARD')
-            .reduce((sum: number, o: any) => sum + o.total, 0);
-        const gcashSales = shift.orders
-            .filter((o: any) => o.paymentMethod === 'GCASH')
-            .reduce((sum: number, o: any) => sum + o.total, 0);
-        const paymayaSales = shift.orders
-            .filter((o: any) => o.paymentMethod === 'PAYMAYA')
-            .reduce((sum: number, o: any) => sum + o.total, 0);
+        let totalSales = 0;
+        let cashSales = 0;
+        let cardSales = 0;
+        let gcashSales = 0;
+        let paymayaSales = 0;
+        let otherSales = 0;
+
+        // Iterate through all orders and their payments
+        shift.orders.forEach((order: any) => {
+            if (order.status === 'COMPLETED') {
+                // Check if order has payments relation loaded
+                if (order.payments && order.payments.length > 0) {
+                    order.payments.forEach((payment: any) => {
+                        const amount = payment.amount;
+                        totalSales += amount;
+
+                        const method = payment.method.toUpperCase();
+                        if (method === 'CASH') cashSales += amount;
+                        else if (method === 'CARD' || method === 'DEBIT' || method === 'CREDIT') cardSales += amount;
+                        else if (method === 'GCASH') gcashSales += amount;
+                        else if (method === 'PAYMAYA') paymayaSales += amount;
+                        else otherSales += amount;
+                    });
+                } else {
+                    // Fallback for legacy orders without Payment records (using order.paymentMethod)
+                    // This ensures old data still works in reports
+                    const amount = order.total;
+                    totalSales += amount;
+                    const method = (order.paymentMethod || 'CASH').toUpperCase();
+                    if (method === 'CASH') cashSales += amount;
+                    else if (method === 'CARD' || method === 'DEBIT' || method === 'CREDIT') cardSales += amount;
+                    else if (method === 'GCASH') gcashSales += amount;
+                    else if (method === 'PAYMAYA') paymayaSales += amount;
+                    else otherSales += amount;
+                }
+            }
+        });
+
+        const totalOrders = shift.orders.length;
 
         // Discounts
         const totalDiscounts = shift.orders.reduce(

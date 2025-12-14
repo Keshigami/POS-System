@@ -25,15 +25,16 @@ interface ProviderStatus {
 
 export default function SettingsPage() {
     const router = useRouter();
-    const [activeSection, setActiveSection] = useState<"payments" | "delivery" | "charges">("payments");
+    const [activeSection, setActiveSection] = useState<"payments" | "delivery" | "charges" | "data">("payments");
     const [integrations, setIntegrations] = useState<IntegrationConfig[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Service charge settings
-    const [serviceChargeEnabled, setServiceChargeEnabled] = useState(false);
-    const [serviceChargeLabel, setServiceChargeLabel] = useState("Service Charge");
-    const [serviceChargePercentage, setServiceChargePercentage] = useState(0);
-    const [serviceChargeSaving, setServiceChargeSaving] = useState(false);
+    // Service charge settings - Future Implementation
+    // const [serviceChargeEnabled, setServiceChargeEnabled] = useState(false);
+    // const [serviceChargeLabel, setServiceChargeLabel] = useState("Service Charge");
+    // const [serviceChargePercentage, setServiceChargePercentage] = useState(0);
+    // const [serviceChargeSaving, setServiceChargeSaving] = useState(false);
 
     // Provider-specific form states
     const [providerStates, setProviderStates] = useState<Record<string, ProviderStatus>>({});
@@ -396,6 +397,18 @@ export default function SettingsPage() {
                             Delivery Platforms
                         </div>
                     </button>
+                    <button
+                        className={`px-4 py-2 font-medium transition-colors ${activeSection === "data"
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
+                            }`}
+                        onClick={() => setActiveSection("data")}
+                    >
+                        <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" /> {/* Reuse icon or import Database */}
+                            Data Management
+                        </div>
+                    </button>
                 </div>
 
                 {/* Content */}
@@ -415,6 +428,74 @@ export default function SettingsPage() {
                             <div>
                                 {deliveryProviders.map(provider => renderProviderCard(provider, "delivery"))}
                             </div>
+                        )}
+
+                        {activeSection === "data" && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Data Management (CSV)</CardTitle>
+                                    <CardDescription>Import or Export bulk data.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 border rounded-md space-y-2">
+                                            <h3 className="font-semibold">Export Data</h3>
+                                            <p className="text-sm text-muted-foreground">Download current data as CSV.</p>
+                                            <div className="flex gap-2">
+                                                <Button size="sm" variant="outline" onClick={() => window.open('/api/data/export?type=products', '_blank')}>
+                                                    Export Products
+                                                </Button>
+                                                <Button size="sm" variant="outline" onClick={() => window.open('/api/data/export?type=customers', '_blank')}>
+                                                    Export Customers
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 border rounded-md space-y-2">
+                                            <h3 className="font-semibold">Import Data</h3>
+                                            <p className="text-sm text-muted-foreground">Upload CSV to add/update records.</p>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold">Products:</span>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".csv"
+                                                        onChange={async (e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (!file) return;
+                                                            const formData = new FormData();
+                                                            formData.append("file", file);
+                                                            formData.append("type", "products");
+
+                                                            const res = await fetch('/api/data/import', { method: 'POST', body: formData });
+                                                            const json = await res.json();
+                                                            alert(`Imported: ${json.imported}, Failed: ${json.failed}`);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold">Customers:</span>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".csv"
+                                                        onChange={async (e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (!file) return;
+                                                            const formData = new FormData();
+                                                            formData.append("file", file);
+                                                            formData.append("type", "customers");
+
+                                                            const res = await fetch('/api/data/import', { method: 'POST', body: formData });
+                                                            const json = await res.json();
+                                                            alert(`Imported: ${json.imported}, Failed: ${json.failed}`);
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )}
                     </div>
                 )}

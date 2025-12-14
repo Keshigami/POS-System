@@ -22,7 +22,11 @@ export async function PATCH(
         const shift = await prisma.shift.findUnique({
             where: { id },
             include: {
-                orders: true,
+                orders: {
+                    include: {
+                        payments: true
+                    }
+                },
             },
         });
 
@@ -40,14 +44,29 @@ export async function PATCH(
             );
         }
 
-        // Calculate expected cash
-        const cashOrders = shift.orders.filter(
-            (order: any) => order.paymentMethod === 'CASH'
-        );
-        const totalCashSales = cashOrders.reduce(
-            (sum: number, order: any) => sum + (order.amountPaid || 0),
-            0
-        );
+        // Calculate expected cash from sales
+        // We need to account for Split Payments (partial cash) and legacy full cash orders
+        let totalCashSales = 0;
+
+        shift.orders.forEach((order: any) => {
+            // Only count completed orders
+            if (order.status !== 'COMPLETED') return;
+
+            // Prioritize Order.payments if available (Split Payment support)
+            if (order.payments && order.payments.length > 0) {
+                order.payments.forEach((p: any) => {
+                    if (p.method.toUpperCase() === 'CASH') {
+                        totalCashSales += p.amount;
+                    }
+                });
+            } else {
+                // Fallback for legacy data or simple cashier flow
+                if (order.paymentMethod === 'CASH') {
+                    totalCashSales += (order.amountPaid || order.total); // Use amountPaid if tracked, else total
+                }
+            }
+        });
+
         const expectedCash = shift.startCash + totalCashSales;
         const variance = parseFloat(endCash) - expectedCash;
 

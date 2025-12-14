@@ -21,6 +21,17 @@ model Store {
   orders                  Order[]
   categories              Category[]
   shifts                  Shift[]
+  customers               Customer[]
+  suppliers               Supplier[]
+  quotes                  Quote[]
+  purchaseOrders          PurchaseOrder[]
+  expenses                Expense[]
+  giftCards               GiftCard[]
+  
+  // Loyalty Settings
+  pointsEarnRate          Float        @default(0.01) // Points earned per currency unit (e.g. 0.01 = 1 point per 100)
+  pointValue              Float        @default(1.0)  // Value of 1 point in currency default 0.01 meaning 1 point = 1 cent? No plan said 1 point = 1 peso.
+  
   createdAt               DateTime     @default(now())
   updatedAt               DateTime     @updatedAt
 }
@@ -103,8 +114,98 @@ model Product {
   forecasts    ForecastData[]
   priceHistory PriceHistory[]
   costPriceHistory CostPriceHistory[]
+  
+  quoteItems   QuoteItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  // Inventory Forecasting
+  reorderPoint Int             @default(10) // When stock hits this, reorder
+  safetyStock  Int             @default(5)  // Minimum buffer
+  leadTime     Int             @default(3)  // Days to restock
+  
+  supplierId   String?
+  supplier     Supplier?       @relation(fields: [supplierId], references: [id])
+
+  // Variants & Barcode
+  barcode      String?         @unique
+  hasVariants  Boolean         @default(false)
+  variants     ProductVariant[]
+
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  price       Float?   // Override base price
+  costPrice   Float?   // Override base cost
+  stock       Int      @default(0)
+  barcode     String?  @unique
+  sku         String?
+  
+  orderItems          OrderItem[]
+  quoteItems          QuoteItem[]
+  purchaseOrderItems  PurchaseOrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String?
+  email     String?
+  address   String?
+  notes     String?
+  
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  
+  products  Product[]
+  purchaseOrders PurchaseOrder[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  quoteNumber     Int?        // Sequential number
+  total           Float
+  status          String      @default("PENDING") // PENDING, CONVERTED, EXPIRED
+  
+  // Customer info (optional as it might be a new walk-in)
+  customerId      String?
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+  customerName    String?     // For walk-ins
+  
+  items           QuoteItem[]
+  
+  storeId         String
+  store           Store       @relation(fields: [storeId], references: [id])
+  
+  validUntil      DateTime?
+  notes           String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model QuoteItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  quote       Quote    @relation(fields: [quoteId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  price       Float
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  variantName String?
 }
 
 model Order {
@@ -112,7 +213,7 @@ model Order {
   receiptNumber    Int?        // Per-store sequential number logic needed later
   total            Float
   amountPaid       Float?
-  status           String      @default("COMPLETED")
+  status           String      @default("COMPLETED") // COMPLETED, CANCELLED, HELD
   paymentMethod    String      @default("CASH")
   paymentReference String?
   discountType     String      @default("NONE")
@@ -123,10 +224,53 @@ model Order {
   store            Store       @relation(fields: [storeId], references: [id])
   shiftId          String?
   shift            Shift?      @relation(fields: [shiftId], references: [id])
+  payments         Payment[]
+  customerId       String?
+  customer         Customer?   @relation(fields: [customerId], references: [id])
+  parkedAt         DateTime?   // When order was parked
+  parkedBy         String?     // Cashier name who parked it
   items            OrderItem[]
   deliveryOrders   DeliveryOrder[]
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  contact     String?
+  totalDebt   Float    @default(0)
+  pointsBalance Int    @default(0)
+  creditLimit Float?   // Optional limit
+  notes       String?
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  orders      Order[]
+  quotes      Quote[]
+  creditTransactions CreditTransaction[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  amount      Float    // Positive for debt increase (purchase), Negative for payment
+  type        String   // PURCHASE, PAYMENT, ADJUSTMENT
+  description String?
+  referenceId String?  // Link to Order ID if applicable
+  createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Float
+  method    String   // CASH, GCASH, CARD, etc.
+  reference String?  // Reference number for non-cash payments
+  createdAt DateTime @default(now())
 }
 
 model OrderItem {
@@ -137,6 +281,9 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   price     Float
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  variantName String?
 }
 
 model Package {
@@ -253,4 +400,60 @@ model Shift {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   orders       Order[]
+}
+
+model PurchaseOrder {
+  id             String              @id @default(cuid())
+  poNumber       String              @unique
+  supplierId     String
+  supplier       Supplier            @relation(fields: [supplierId], references: [id])
+  storeId        String
+  store          Store               @relation(fields: [storeId], references: [id])
+  status         String              @default("ORDERED") // ORDERED, RECEIVED, CANCELLED
+  totalAmount    Float               @default(0)
+  items          PurchaseOrderItem[]
+  notes          String?
+  expectedDate   DateTime?
+  receivedDate   DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  quantity        Int
+  costPrice       Float         @default(0) // Capture cost at time of order
+  variantId       String?
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  amount    Float
+  category  String   // Rent, Utilities, Salaries, Supplies, Maintenance, Other
+  date      DateTime @default(now())
+  notes     String?
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GiftCard {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  initialBalance Float
+  currentBalance Float
+  status         String   @default("ACTIVE") // ACTIVE, USED, EXPIRED
+  expiresAt      DateTime?
+  
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

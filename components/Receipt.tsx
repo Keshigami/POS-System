@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 
 interface OrderItem {
@@ -28,37 +29,29 @@ interface ReceiptProps {
 }
 
 export function Receipt({ order, onClose }: ReceiptProps) {
+    const [title, setTitle] = useState("OFFICIAL RECEIPT");
+
     if (!order) return null;
 
     const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     // VAT Calculations
-    // In PH, prices are usually VAT-inclusive.
-    // Vatable Sales = Total / 1.12
-    // VAT Amount = Total - Vatable Sales
-    // If Senior/PWD, sales are VAT Exempt.
-
     let vatableSales = 0;
     let vatAmount = 0;
     let vatExemptSales = 0;
-    let zeroRatedSales = 0; // Export, etc. (usually 0 for local POS)
+    let zeroRatedSales = 0;
 
     if (order.discountType !== "NONE") {
-        // Senior/PWD: VAT Exempt
-        // The total stored is already discounted and VAT-exempt
-        // Original Price (VAT inclusive) -> Remove VAT -> Apply 20% Discount
-        // So the 'total' here is the final amount paid.
-        // For the receipt, we should show the breakdown.
-        // The amount they pay is the VAT-exempt amount.
         vatExemptSales = order.total;
     } else {
-        // Regular: VAT Inclusive
         vatableSales = order.total / 1.12;
         vatAmount = order.total - vatableSales;
     }
 
-    const handlePrint = () => {
-        window.print();
+    const handlePrint = (docTitle: string) => {
+        setTitle(docTitle);
+        // Timeout to allow state update before printing
+        setTimeout(() => window.print(), 100);
     };
 
     return (
@@ -66,31 +59,37 @@ export function Receipt({ order, onClose }: ReceiptProps) {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 {/* Print-only header */}
                 <div className="hidden print:block text-center py-4 border-b">
-                    <h1 className="text-xl font-bold">POS SYSTEM PH</h1>
-                    <p className="text-xs">123 Business Street, Makati City</p>
-                    <p className="text-xs">TIN: 123-456-789-00000</p>
+                    {/* Header content duplicates in print view via CSS, but title needs to be dynamic */}
                 </div>
 
                 {/* Screen header */}
                 <div className="p-4 border-b flex items-center justify-between print:hidden">
-                    <h2 className="text-xl font-bold">Receipt</h2>
-                    <Button variant="ghost" size="icon" onClick={onClose}>
-                        <X className="h-5 w-5" />
-                    </Button>
+                    <h2 className="text-xl font-bold">Transaction Details</h2>
+                    <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handlePrint("OFFICIAL RECEIPT")}>
+                            Print OR
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handlePrint("SALES INVOICE")}>
+                            Print Invoice
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={onClose}>
+                            <X className="h-5 w-5" />
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Receipt content */}
                 <div className="p-6 print:p-8 text-xs font-mono" id="receipt-content">
-                    {/* Store Info - always visible in print, hidden on screen if duplicated */}
-                    <div className="text-center mb-6 print:hidden">
+                    {/* Store Info */}
+                    <div className="text-center mb-6">
                         <h1 className="text-xl font-bold">POS SYSTEM PH</h1>
                         <p className="text-xs text-muted-foreground">123 Business Street, Makati City</p>
                         <p className="text-xs text-muted-foreground">TIN: 123-456-789-00000</p>
                     </div>
 
                     <div className="text-center mb-4">
-                        <p className="font-bold text-lg">OFFICIAL RECEIPT</p>
-                        <p>OR No: {(order.receiptNumber || 0).toString().padStart(9, '0')}</p>
+                        <p className="font-bold text-lg">{title}</p>
+                        <p>{title === "OFFICIAL RECEIPT" ? "OR" : "SI"} No: {(order.receiptNumber || 0).toString().padStart(9, '0')}</p>
                         <p>{new Date(order.createdAt).toLocaleString("en-PH", {
                             dateStyle: "medium",
                             timeStyle: "short",
