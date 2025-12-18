@@ -91,8 +91,9 @@ export function POSHeader({
                             }
                         }}
                         className="text-xs h-8"
+                        title={autoPrintEnabled ? "Disable Auto Print" : "Enable Auto Print"}
                     >
-                        <Printer className="h-3 w-3 mr-1" /> Auto Print
+                        <Printer className="h-3 w-3 mr-1" /> {autoPrintEnabled ? "Disable Auto Print" : "Enable Auto Print"}
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
