@@ -1,6 +1,6 @@
-import { trainForecastingModel } from './lib/ml/forecasting-model';
-import { trainPricingModel } from './lib/ml/pricing-model';
-import prisma from './lib/prisma';
+import { trainForecastingModel } from '../lib/ml/forecasting-model';
+import { trainPricingModel } from '../lib/ml/pricing-model';
+import prisma from '../lib/prisma';
 
 async function runEvaluations() {
     console.log('🤖 Starting Model Evaluation Demo...\n');

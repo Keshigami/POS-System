@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         const orderStatus = status || 'COMPLETED';
 
         // Prepare payment data
-        let paymentRecords = [];
+        let paymentRecords: any[] = [];
         let creditAmount = 0;
 
         if (orderStatus === 'COMPLETED') {
@@ -185,8 +185,31 @@ export async function POST(request: Request) {
             }
         }
 
-        // Decrement Stock
+        // Decrement Stock using FIFO (First In, First Out) from batches
         for (const item of items) {
+            let remainingQty = item.quantity;
+
+            // Try FIFO deduction from batches first
+            const batches = await (prisma as any).productBatch.findMany({
+                where: { productId: item.productId, stock: { gt: 0 } },
+                orderBy: [
+                    { expiryDate: 'asc' }, // Earliest expiry first
+                    { receivedDate: 'asc' } // Then oldest received
+                ]
+            });
+
+            for (const batch of batches) {
+                if (remainingQty <= 0) break;
+
+                const deductFromBatch = Math.min(batch.stock, remainingQty);
+                await (prisma as any).productBatch.update({
+                    where: { id: batch.id },
+                    data: { stock: { decrement: deductFromBatch } }
+                });
+                remainingQty -= deductFromBatch;
+            }
+
+            // Always update the main product stock for display purposes
             await prisma.product.update({
                 where: { id: item.productId },
                 data: { stock: { decrement: item.quantity } }

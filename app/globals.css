@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Only show the print area (Receipt) */
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+
+  /* Position the print area at top-left */
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Reset body styling for print */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    overflow: hidden; /* Prevent scrollbars from printing */
+  }
+
+  /* Hide specific UI elements if not caught by global hide */
+  .no-print {
+    display: none !important;
+  }
+}
+
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

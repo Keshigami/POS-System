@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { seedByBusinessType } from '@/prisma/seed';
+import { seedByBusinessType } from '@/prisma/seed-export';
 
 export async function POST(request: Request) {
     try {

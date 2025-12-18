@@ -130,6 +130,7 @@ model Product {
   barcode      String?         @unique
   hasVariants  Boolean         @default(false)
   variants     ProductVariant[]
+  batches      ProductBatch[]
 
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -456,4 +457,21 @@ model GiftCard {
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model ProductBatch {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  stock        Int      // Current stock in this batch
+  initialStock Int      // Original amount received
+  costPrice    Float    // Specific cost for this batch
+  expiryDate   DateTime? 
+  receivedDate DateTime @default(now())
+  
+  // Track origin
+  purchaseOrderId String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

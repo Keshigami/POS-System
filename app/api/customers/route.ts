@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // GET /api/customers?search=...
 export async function GET(req: Request) {
@@ -7,7 +7,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const search = searchParams.get("search") || "";
 
-        const where: any = {};
+        const where: Record<string, unknown> = {};
         if (search) {
             where.OR = [
                 { name: { contains: search } }, // Case insensitive usually depends on DB collation
@@ -15,14 +15,14 @@ export async function GET(req: Request) {
             ];
         }
 
-        const customers = await prisma.customer.findMany({
+        const customers = await (prisma as any).customer.findMany({
             where,
             orderBy: { name: "asc" },
             take: 20
         });
 
         return NextResponse.json(customers);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });
     }
 }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
             targetStoreId = defaultStore?.id;
         }
 
-        const customer = await prisma.customer.create({
+        const customer = await (prisma as any).customer.create({
             data: {
                 name,
                 contact,

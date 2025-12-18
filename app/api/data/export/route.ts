@@ -16,7 +16,6 @@ export async function GET(request: Request) {
                     name: true,
                     price: true,
                     stock: true,
-                    description: true,
                     // category: { select: { name: true } } // flattening is needed for simple CSV
                 }
             });
@@ -25,7 +24,7 @@ export async function GET(request: Request) {
                 name: p.name,
                 price: p.price,
                 stock: p.stock,
-                description: p.description
+                description: p.description || ''
             }));
         } else if (type === 'customers') {
             data = await prisma.customer.findMany({
@@ -40,7 +39,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Invalid type" }, { status: 400 });
         }
 
-        const csv = Papa.unparse(data);
+        const csv = Papa.unparse(data as any);
 
         return new NextResponse(csv, {
             headers: {
