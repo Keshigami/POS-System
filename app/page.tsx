@@ -129,7 +129,7 @@ export default function POSPage() {
     // Fetch current shift on mount
     const fetchCurrentShift = useCallback(async () => {
         try {
-            const res = await fetch("/api/shifts");
+            const res = await fetch("/api/shifts?userId=default-user-id");
             const shift = await res.json();
             setCurrentShift(shift);
             if (!shift) {
@@ -149,7 +149,7 @@ export default function POSPage() {
     // Fetch Customers
     const fetchCustomers = useCallback(async () => {
         try {
-            const res = await fetch(`/ api / customers ? query = ${customerSearchQuery} `);
+            const res = await fetch(`/api/customers?query=${customerSearchQuery}`);
             const data = await res.json();
             setCustomerList(data);
         } catch (e) { console.error(e); }
