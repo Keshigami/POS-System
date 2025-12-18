@@ -120,6 +120,41 @@ export default function POSPage() {
         }
     }, []);
 
+    // Authentication State
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [loadingAuth, setLoadingAuth] = useState(false);
+
+    // Session Management
+    useEffect(() => {
+    const checkAuthStatus = async () => {
+        try {
+            const response = await fetch('/api/auth/status', {
+                    credentials: 'include'
+                });
+                const isAuthenticated = response.ok;
+            
+            if (!isAuthenticated) {
+                setCurrentUser(null);
+            } else {
+                // Fetch user details if authenticated
+                const userResponse = await fetch('/api/auth/user', {
+                    credentials: 'include'
+                });
+                if (userResponse.ok) {
+                    setCurrentUser(userResponse.data);
+                }
+            }
+        } catch (error) {
+            console.error('Auth status check failed:', error);
+        }
+    };
+
+        checkAuthStatus();
+        const interval = setInterval(checkAuthStatus, 60000); // Check every minute
+
+        return () => clearInterval(interval);
+    }, []);
+
     // Shift Logic
     const [currentShift, setCurrentShift] = useState<any>(null);
     const [showOpenShift, setShowOpenShift] = useState(false);
@@ -128,8 +163,20 @@ export default function POSPage() {
 
     // Fetch current shift on mount
     const fetchCurrentShift = useCallback(async () => {
+        if (!currentUser) {
+            console.warn('No authenticated user - fetching shift status');
+            setCurrentShift(null);
+            setShowOpenShift(true);
+            setLoadingShift(false);
+            return;
+        }
+
         try {
-            const res = await fetch("/api/shifts?userId=default-user-id");
+            const res = await fetch("/api/shifts?userId=default-user-id", {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+                }
+            });
             const shift = await res.json();
             setCurrentShift(shift);
             if (!shift) {
@@ -140,11 +187,11 @@ export default function POSPage() {
         } finally {
             setLoadingShift(false);
         }
-    }, []);
+    }, [currentUser]);
 
     useEffect(() => {
         fetchCurrentShift();
-    }, [fetchCurrentShift]);
+    }, [fetchCurrentShift, currentUser]);
 
     // Fetch Customers
     const fetchCustomers = useCallback(async () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    LayoutDashboard,
     Search,
     Users,
     Clock,
@@ -10,7 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import { useRouter } from "next/navigation"; // Unused now
 import { Customer } from "@/types/pos";
 
 interface POSHeaderProps {
@@ -23,9 +21,10 @@ interface POSHeaderProps {
     setAutoPrintEnabled: (enabled: boolean) => void;
     selectedCustomer: Customer | null;
     onCustomerSelectClick: () => void;
+    onLogout: () => void;
 }
 
-export function POSHeader({
+export default function POSHeader({
     searchQuery,
     setSearchQuery,
     currentShift,
@@ -34,17 +33,13 @@ export function POSHeader({
     autoPrintEnabled,
     setAutoPrintEnabled,
     selectedCustomer,
-    onCustomerSelectClick
+    onCustomerSelectClick,
+    onLogout
 }: POSHeaderProps) {
-    // const router = useRouter(); // Unused
-
     return (
         <>
             <header className="border-b bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between gap-4 sticky top-0 z-40 shadow-sm">
-                {/* Logo removed (moved to sidebar) */}
-
                 <div className="flex items-center gap-4 flex-1 max-w-xl mx-auto">
-                    {/* Customer Selector Button */}
                     <Button
                         variant={selectedCustomer ? "default" : "outline"}
                         className="gap-2 min-w-[140px] truncate"
@@ -55,31 +50,31 @@ export function POSHeader({
                             {selectedCustomer ? selectedCustomer.name : "Select Customer"}
                         </span>
                     </Button>
-
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search products... (F4)"
-                            className="pl-8 bg-gray-100 dark:bg-gray-900 border-none"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            id="product-search"
-                        />
-                    </div>
+                    {onLogout && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onLogout}
+                            className="text-xs h-8"
+                        >
+                            Logout
+                        </Button>
+                    )}
                 </div>
 
-                {/* Right side Nav Icons removed (moved to sidebar) */}
-            </header>
+                <div className="relative flex-1">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search products... (F4)"
+                        className="pl-8 bg-gray-100 dark:bg-gray-900 border-none"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        id="product-search"
+                    />
+                </div>
+                </div>
 
-            {/* Quick Actions (Employee / Reports Links) */}
-            <div className="bg-white dark:bg-gray-800 border-b px-4 py-2 flex items-center justify-between gap-4 overflow-x-auto">
-                <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => (window.location.href = '/reports')} className="text-xs h-8">
-                        <LayoutDashboard className="h-3 w-3 mr-1" /> Reports
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => (window.location.href = '/employees')} className="text-xs h-8">
-                        <UserCheck className="h-3 w-3 mr-1" /> Staff
-                    </Button>
+                <div className="flex items-center gap-2">
                     <Button
                         variant={autoPrintEnabled ? "default" : "outline"}
                         size="sm"
@@ -93,7 +88,7 @@ export function POSHeader({
                         className="text-xs h-8"
                         title={autoPrintEnabled ? "Disable Auto Print" : "Enable Auto Print"}
                     >
-                        <Printer className="h-3 w-3 mr-1" /> {autoPrintEnabled ? "Disable Auto Print" : "Enable Auto Print"}
+                        <Printer className="h-3 w-3" /> {autoPrintEnabled ? "Disable Auto Print" : "Enable Auto Print"}
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
