@@ -4,17 +4,24 @@ import {
     Search,
     Users,
     Clock,
-    UserCheck,
     Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Customer } from "@/types/pos";
 
+interface Shift {
+    id: string;
+    startTime: string;
+    endTime?: string;
+    userId: string;
+    isActive: boolean;
+}
+
 interface POSHeaderProps {
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    currentShift: any | null;
+    currentShift: Shift | null;
     onOpenShift: () => void;
     onCloseShift: () => void;
     autoPrintEnabled: boolean;
@@ -24,7 +31,7 @@ interface POSHeaderProps {
     onLogout: () => void;
 }
 
-export default function POSHeader({
+function POSHeader({
     searchQuery,
     setSearchQuery,
     currentShift,
@@ -38,7 +45,7 @@ export default function POSHeader({
 }: POSHeaderProps) {
     return (
         <>
-            <header className="border-b bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between gap-4 sticky top-0 z-40 shadow-sm">
+            <header className="border-b bg-white px-4 py-3 flex items-center justify-between gap-4 sticky top-0 z-40 shadow-sm">
                 <div className="flex items-center gap-4 flex-1 max-w-xl mx-auto">
                     <Button
                         variant={selectedCustomer ? "default" : "outline"}
@@ -66,12 +73,11 @@ export default function POSHeader({
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search products... (F4)"
-                        className="pl-8 bg-gray-100 dark:bg-gray-900 border-none"
+                        className="pl-8 bg-gray-100 border-none"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         id="product-search"
                     />
-                </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -121,7 +127,9 @@ export default function POSHeader({
                         </>
                     )}
                 </div>
-            </div>
+            </header>
         </>
     );
 }
+
+export { POSHeader };

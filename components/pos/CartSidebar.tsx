@@ -41,8 +41,8 @@ export function CartSidebar({
     onAddToCart
 }: CartSidebarProps) {
     return (
-        <div className="hidden lg:flex w-96 bg-white dark:bg-gray-800 border-l flex-col h-full shadow-xl">
-            <div className="p-4 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
+        <div className="hidden lg:flex w-96 bg-white border-l flex-col h-full shadow-xl">
+            <div className="p-4 border-b flex items-center justify-between bg-gray-50">
                 <h2 className="font-bold text-lg flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5" />
                     Current Order
@@ -58,21 +58,21 @@ export function CartSidebar({
                     </div>
                 ) : (
                     cart.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
+                        <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
                             <div className="flex-1 min-w-0">
                                 <h4 className="font-medium truncate">{item.name}</h4>
                                 <p className="text-sm text-muted-foreground">₱{item.price.toFixed(2)}</p>
                             </div>
-                            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-md border p-1">
+                            <div className="flex items-center gap-2 bg-white rounded-md border p-1">
                                 <button
-                                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                                    className="p-1 hover:bg-gray-100 rounded"
                                     onClick={() => onUpdateQuantity(item.id, -1)}
                                 >
                                     <Minus className="h-3 w-3" />
                                 </button>
                                 <span className="w-4 text-center text-sm font-medium">{item.quantity}</span>
                                 <button
-                                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                                    className="p-1 hover:bg-gray-100 rounded"
                                     onClick={() => onUpdateQuantity(item.id, 1)}
                                 >
                                     <Plus className="h-3 w-3" />
@@ -92,7 +92,7 @@ export function CartSidebar({
                 )}
             </div>
 
-            <div className="p-4 border-t bg-gray-50 dark:bg-gray-900/50 space-y-4">
+            <div className="p-4 border-t bg-gray-50 space-y-4">
                 {/* Discount Selector */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Customer Type</label>
@@ -131,7 +131,7 @@ export function CartSidebar({
                         <span>₱{subtotal.toFixed(2)}</span>
                     </div>
                     {discount > 0 && (
-                        <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                        <div className="flex justify-between text-sm text-green-600">
                             <span>Discount (20%)</span>
                             <span>-₱{discount.toFixed(2)}</span>
                         </div>
@@ -141,7 +141,7 @@ export function CartSidebar({
                     <div className="mt-4">
                         <div className="flex items-center gap-2 mb-2">
                             <Sparkles className="h-4 w-4 text-purple-500" />
-                            <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-400">Smart Suggestions</h3>
+                            <h3 className="text-sm font-semibold text-purple-700">Smart Suggestions</h3>
                         </div>
 
                         {/* Payment Method UI Logic: Hide suggestions if showing payment? */}
@@ -177,7 +177,7 @@ export function CartSidebar({
                         <div className="flex gap-2 w-full">
                             <Button
                                 variant="outline"
-                                className="flex-1 border-dashed border-gray-400 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                className="flex-1 border-dashed border-gray-400 text-gray-600 hover:bg-gray-100"
                                 onClick={onParkOrder}
                                 disabled={cart.length === 0}
                             >
@@ -186,10 +186,10 @@ export function CartSidebar({
                             </Button>
                             <Button
                                 variant="outline"
-                                className="flex-1 border-dashed border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                className="flex-1 border-dashed border-blue-400 text-blue-600 hover:bg-blue-50"
                                 onClick={() => {
-                                    // Quote logic - currently simplified to just alert in old code? 
-                                    // Actually old code had saveQuote function. 
+                                    // Quote logic - currently simplified to just alert in old code?
+                                    // Actually old code had saveQuote function.
                                     // This button was not in the snippet I viewed above?
                                     // Let me check. The snippet cut off at 1599.
                                     // I'll assume logic for Quote if I can find it, or just use Park for now.

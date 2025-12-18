@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import jwt, { SignOptions } from 'jsonwebtoken';
+
 export interface User {
     id: string;
     username: string;
@@ -18,30 +21,36 @@ export class AuthService {
 
     static async hashPin(pin: string): Promise<string> {
         // Use a secure hashing algorithm for PINs
-        const crypto = require('crypto');
         return new Promise((resolve, reject) => {
             const salt = crypto.randomBytes(16).toString('hex');
-            crypto.pbkdf2(pin, salt, 10000, 64, 'sha256', (err: Error, derivedKey: Buffer) => {
+            crypto.pbkdf2(pin, salt, 10000, 64, 'sha256', (err: Error | null, derivedKey: Buffer) => {
                 if (err) reject(err);
-                resolve(derivedKey.toString('hex'));
+                resolve(derivedKey.toString('hex') + ':' + salt);
             });
         });
     }
 
     static async verifyPin(pin: string, hashedPin: string): Promise<boolean> {
-        const crypto = require('crypto');
+        // For production, verify against actual hash
+        const [hash, salt] = hashedPin.split(':');
+        
+        if (!hash || !salt) {
+            // Fallback for plain text (migration period)
+            return pin === hashedPin;
+        }
+        
         return new Promise((resolve) => {
-            const salt = crypto.randomBytes(16).toString('hex');
-            crypto.pbkdf2(pin, salt, 10000, 64, 'sha256', (err: Error, derivedKey: Buffer) => {
-                if (err) resolve(false);
-                resolve(derivedKey.toString('hex') === hashedPin);
+            crypto.pbkdf2(pin, salt, 10000, 64, 'sha256', (err: Error | null, derivedKey: Buffer) => {
+                if (err) {
+                    resolve(false);
+                    return;
+                }
+                resolve(derivedKey.toString('hex') === hash);
             });
         });
     }
 
     static async generateJWT(user: User): Promise<string> {
-        const jwt = require('jsonwebtoken');
-        
         const payload = {
             userId: user.id,
             username: user.username,
@@ -50,7 +59,7 @@ export class AuthService {
             isActive: user.isActive
         };
 
-        const options = {
+        const options: SignOptions = {
             expiresIn: this.TOKEN_EXPIRY,
             issuer: 'pos-system'
         };
@@ -59,16 +68,20 @@ export class AuthService {
     }
 
     static async verifyJWT(token: string): Promise<User | null> {
-        const jwt = require('jsonwebtoken');
-        
         try {
-            const decoded = jwt.verify(token, this.JWT_SECRET) as any;
-            
+            const decoded = jwt.verify(token, this.JWT_SECRET) as unknown as {
+                userId: string;
+                username: string;
+                role: string;
+                storeId: string;
+                isActive: boolean;
+            };
+
             return {
                 id: decoded.userId,
                 username: decoded.username,
-                pin: decoded.pin,
-                role: decoded.role,
+                pin: '', // PIN is not stored in JWT for security
+                role: decoded.role as User['role'],
                 storeId: decoded.storeId,
                 isActive: decoded.isActive
             };

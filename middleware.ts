@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { SessionManager } from '@/lib/session';
 import { AuthService } from '@/lib/auth';
+import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
@@ -23,7 +24,7 @@ const PUBLIC_ROUTES = [
     '/api/auth/logout'
 ];
 
-export async function middleware(req: any) {
+export async function middleware(req: NextRequest & { user?: any }) {
     const { pathname } = req.nextUrl;
 
     // Check if route is public

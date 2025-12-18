@@ -5,13 +5,19 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartItem, Product } from "@/types/pos";
 
+interface SuggestionItem {
+    productId: string;
+    name: string;
+    price: number;
+}
+
 interface SmartSuggestionsProps {
     cartItems: CartItem[];
     onAdd: (product: Product) => void;
 }
 
 export function SmartSuggestions({ cartItems, onAdd }: SmartSuggestionsProps) {
-    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -43,10 +49,10 @@ export function SmartSuggestions({ cartItems, onAdd }: SmartSuggestionsProps) {
     return (
         <div className="space-y-2">
             {suggestions.map((item) => (
-                <div key={item.productId} className="flex items-center justify-between p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                <div key={item.productId} className="flex items-center justify-between p-2 bg-purple-50 rounded-lg border border-purple-100">
                     <div>
-                        <p className="text-sm font-medium text-purple-900 dark:text-purple-100">{item.name}</p>
-                        <p className="text-xs text-purple-600 dark:text-purple-300">Frequently bought together</p>
+                        <p className="text-sm font-medium text-purple-900">{item.name}</p>
+                        <p className="text-xs text-purple-600">Frequently bought together</p>
                     </div>
                     <Button
                         size="sm"

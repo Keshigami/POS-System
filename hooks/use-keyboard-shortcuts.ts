@@ -17,13 +17,13 @@ export const useKeyboardShortcuts = (shortcuts: KeyCombo[]) => {
             const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
 
             // Allow F-keys even in inputs, but block letters/numbers
-            if (isInput && !event.key.startsWith('F') && event.key !== 'Escape') {
+            if (isInput && event.key && !event.key.startsWith('F') && event.key !== 'Escape') {
                 return;
             }
 
             shortcuts.forEach((shortcut) => {
                 if (
-                    event.key.toLowerCase() === shortcut.key.toLowerCase() &&
+                    event.key && event.key.toLowerCase() === shortcut.key.toLowerCase() &&
                     !!event.ctrlKey === !!shortcut.ctrl &&
                     !!event.altKey === !!shortcut.alt &&
                     !!event.shiftKey === !!shortcut.shift &&

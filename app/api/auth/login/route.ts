@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { AuthService } from '@/lib/auth';
+import type { User } from '@/lib/auth';
 
 export async function POST(request: Request) {
     try {
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
         const res = await fetch(`/api/auth/users/${username}`);
         const users = res.ok ? await res.json() : [];
         
-        const user = users.find((u: any) => u.username === username);
+        const user = users.find((u: User) => u.username === username);
         
         if (!user) {
             return NextResponse.json(
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
         }
 
         // Generate JWT and set session
-        const token = AuthService.generateJWT({
+        const token = await AuthService.generateJWT({
             id: user.id,
             username: user.username,
             pin: user.pin,

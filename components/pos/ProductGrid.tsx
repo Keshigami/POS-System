@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Product, Package, Category } from "@/types/pos";
 import { getProductImage } from "@/lib/product-utils";
+import Image from "next/image";
 
 interface ProductGridProps {
     products: Product[] | undefined;
@@ -44,9 +45,9 @@ export function ProductGrid({
     });
 
     return (
-        <main className="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <main className="flex-1 p-4 overflow-y-auto bg-gray-50">
             {/* Quick Access Buttons */}
-            <div className="p-4 border-b bg-white dark:bg-gray-800 shadow-sm rounded-lg mb-4">
+            <div className="p-4 border-b bg-white shadow-sm rounded-lg mb-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Zap className="h-4 w-4 text-yellow-500" />
                     <h3 className="font-semibold text-sm">Quick Access</h3>
@@ -72,7 +73,7 @@ export function ProductGrid({
 
             {/* Meal Packages */}
             {packages && packages.length > 0 && (
-                <div className="p-4 border-b bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-lg mb-4">
+                <div className="p-4 border-b bg-gradient-to-r from-green-50 to-blue-50 rounded-lg mb-4">
                     <div className="flex items-center gap-2 mb-2">
                         <PackageIcon className="h-4 w-4 text-green-600" />
                         <h3 className="font-semibold text-sm">Meal Packages</h3>
@@ -81,7 +82,7 @@ export function ProductGrid({
                         {packages.map((pkg) => (
                             <Card
                                 key={pkg.id}
-                                className="cursor-pointer hover:shadow-lg transition-all active:scale-95 border-2 border-green-200 dark:border-green-700"
+                                className="cursor-pointer hover:shadow-lg transition-all active:scale-95 border-2 border-green-200"
                                 onClick={() => onAddPackageToCart(pkg)}
                             >
                                 <CardContent className="p-3">
@@ -104,7 +105,7 @@ export function ProductGrid({
             )}
 
             {/* Categories */}
-            <div className="p-4 pb-2 mb-2 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white dark:bg-gray-800 border rounded-lg">
+            <div className="p-4 pb-2 mb-2 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white border rounded-lg">
                 <div className="flex gap-2">
                     {uniqueCategories.map((cat) => (
                         <Button
@@ -134,9 +135,11 @@ export function ProductGrid({
                         >
                             <CardContent className="p-0 flex flex-col h-full justify-between">
                                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-200">
-                                    <img
+                                    <Image
                                         src={getProductImage(product.name, product.category.name)}
                                         alt={product.name}
+                                        width={200}
+                                        height={150}
                                         className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                                         loading="lazy"
                                     />
@@ -149,9 +152,9 @@ export function ProductGrid({
                                         <h3 className="font-bold text-white text-sm leading-tight shadow-sm text-shadow-sm">{product.name}</h3>
                                     </div>
                                 </div>
-                                <div className="p-3 bg-white dark:bg-gray-800">
+                                <div className="p-3 bg-white">
                                     <div className="flex justify-between items-end">
-                                        <span className="font-bold text-green-700 dark:text-green-400 text-lg">
+                                        <span className="font-bold text-green-700 text-lg">
                                             ₱{product.price.toFixed(2)}
                                         </span>
                                         <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${product.stock <= (product.reorderPoint || 10) ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}>

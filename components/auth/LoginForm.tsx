@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AuthService } from "@/lib/auth";
+import type { User } from "@/lib/auth";
 
 interface LoginFormProps {
-    onLogin: (user: any) => void;
+    onLogin: (user: User) => void;
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
@@ -23,12 +23,25 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         setError("");
 
         try {
-            const user = await AuthService.login(credentials);
-            onLogin(user);
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Login failed');
+            }
+
+            onLogin(data.user);
             // Reload page to update authentication state
             window.location.reload();
-        } catch (error: any) {
-            setError(error.message || "Login failed");
+        } catch (error: unknown) {
+            setError(error instanceof Error ? error.message : "Login failed");
         } finally {
             setLoading(false);
         }

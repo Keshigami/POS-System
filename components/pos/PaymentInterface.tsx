@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PaymentMethod, Customer } from "@/types/pos";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+
+interface GiftCardData {
+    currentBalance: number;
+}
 
 interface PaymentInterfaceProps {
     paymentMethod: PaymentMethod;
@@ -18,7 +23,7 @@ interface PaymentInterfaceProps {
     giftCardCode: string;
     setGiftCardCode: (code: string) => void;
     verifyGiftCard: () => void;
-    giftCardData: any;
+    giftCardData: GiftCardData | null;
     selectedCustomer: Customer | null;
     paymentReference: string;
     setPaymentReference: (ref: string) => void;
@@ -50,8 +55,8 @@ export function PaymentInterface({
     const isDigitalPayment = ["GCASH", "MAYA", "CARD"].includes(paymentMethod);
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-gray-50 dark:bg-gray-900 animate-in fade-in slide-in-from-right-4 duration-300">
-            <header className="bg-white dark:bg-gray-800 p-4 shadow-sm z-10 flex items-center gap-4">
+        <div className="flex-1 flex flex-col h-full bg-gray-50 animate-in fade-in slide-in-from-right-4 duration-300">
+            <header className="bg-white p-4 shadow-sm z-10 flex items-center gap-4">
                 <Button variant="ghost" onClick={onBack} className="gap-2 hover:bg-gray-100">
                     <ArrowLeft className="h-5 w-5" /> Back to Products
                 </Button>
@@ -237,10 +242,12 @@ export function PaymentInterface({
                             <div className="max-w-md space-y-4">
                                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-4 items-start">
                                     <div className="bg-white p-2 rounded border">
-                                        <img
+                                        <Image
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PAYMONGO_MOCK_${paymentMethod}_${totalAmount}`}
                                             alt="Payment QR"
-                                            className="w-24 h-24 object-contain"
+                                            width={96}
+                                            height={96}
+                                            className="object-contain"
                                         />
                                     </div>
                                     <div>
@@ -264,7 +271,7 @@ export function PaymentInterface({
 
                         {/* Gift Card Logic */}
                         {paymentMethod === "GIFT_CARD" && (
-                            <div className="space-y-3 animate-fade-in border p-3 rounded-md bg-white dark:bg-gray-800 max-w-md">
+                            <div className="space-y-3 animate-fade-in border p-3 rounded-md bg-white max-w-md">
                                 <label className="text-sm font-medium">Gift Card Code</label>
                                 <div className="flex gap-2">
                                     <Input
@@ -285,7 +292,7 @@ export function PaymentInterface({
 
                         {/* Loyalty Points Logic */}
                         {paymentMethod === "LOYALTY_POINTS" && selectedCustomer && (
-                            <div className="space-y-3 animate-fade-in border p-3 rounded-md bg-white dark:bg-gray-800 max-w-md">
+                            <div className="space-y-3 animate-fade-in border p-3 rounded-md bg-white max-w-md">
                                 <div className="flex justify-between items-center bg-purple-50 p-2 rounded text-purple-700">
                                     <span className="font-bold">Available Points:</span>
                                     <span>{selectedCustomer.pointsBalance} pts (₱{selectedCustomer.pointsBalance.toFixed(2)})</span>
@@ -299,7 +306,7 @@ export function PaymentInterface({
                         )}
                     </div>
 
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t flex justify-end md:static md:bg-transparent md:border-t-0 md:p-0">
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex justify-end md:static md:bg-transparent md:border-t-0 md:p-0">
                         <Button
                             size="lg"
                             className="w-full md:w-auto text-xl py-8 px-12 bg-green-600 hover:bg-green-700 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500"
