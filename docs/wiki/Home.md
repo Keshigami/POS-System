@@ -46,12 +46,12 @@ This is an **open-source POS system** designed to empower Philippine SMEs with:
 
 | Feature | Description |
 |---------|-------------|
-| **Point of Sale** | Fast checkout with search, discounts, and multiple payment methods |
-| **Inventory Management** | Real-time stock tracking with low-stock warnings |
+| **Point of Sale** | Tablet-optimized UI (48dp targets) with search, discounts, and dark mode support |
+| **Inventory Management** | Ledger-based tracking with FIFO batches and low-stock warnings |
 | **Package Management** | Create meal combos and special deals |
 | **BIR Compliance** | Auto-generate receipts with VAT breakdown and TIN |
 | **AI Recommendations** | Smart product suggestions based on cart items |
-| **Payment Gateways** | Support for GCash, Maya, Cash, and Card |
+| **Expense Auditing** | Track costs by payment method and user for full accountability |
 | **Delivery Platforms** | Integration framework for GrabFood & foodpanda |
 
 ## 🤝 Community Contribution

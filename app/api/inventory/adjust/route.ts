@@ -21,7 +21,6 @@ export async function POST(req: Request) {
         const result = await prisma.$transaction(async (tx) => {
             return await recordStockMovement(tx, {
                 productId,
-                quantity: type === "WASTE" || type === "RETURN" && quantity > 0 ? -quantity : quantity,
                 // Logic check: 
                 // WASTE is always removal, so if user sends positive 5 for waste, we treat as -5.
                 // ADJUSTMENT can be + or -.

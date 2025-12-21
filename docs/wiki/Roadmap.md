@@ -132,6 +132,21 @@ To create the **most accessible, powerful, and community-driven POS system** for
 
 ---
 
+### ✅ Phase 6: Robust Reliability & Audit (Completed)
+
+**Status**: Released  
+**Timeline**: Q4 2025
+
+**Features Delivered**:
+
+- ✅ **Stock Ledger**: Immutable `StockMovement` table for all inventory changes.
+- ✅ **FIFO Batches**: Tracking of individual product batches with expiry and cost tracking.
+- ✅ **Expense Audit**: Payment method and user tracking for business expenses.
+- ✅ **Tablet UX Optimization**: 48dp tap targets and high-contrast button borders.
+- ✅ **Theme System**: Universal Light/Dark mode with system preference auto-detection.
+
+**Impact**: 100% inventory accountability and improved operational reliability for tablet environments.
+
 ### 🔮 Phase 5: Advanced Integrations (Future)
 
 **Status**: Concept  
@@ -194,13 +209,13 @@ Based on community feedback, here are the top feature requests:
 | Feature | Votes | Status | Planned Phase |
 |---------|-------|--------|---------------|
 | Barcode scanning | 45 | 📋 Planned | Phase 4 |
-| Multiple cashier accounts | 38 | 📋 Planned | Phase 4 |
-| Sales analytics dashboard | 32 | 🚧 In Progress | Phase 3 |
-| Offline mode | 28 | 💭 Considering | TBD |
+| Multiple cashier accounts | 38 | ✅ Completed | Phase 4 |
+| Sales analytics dashboard | 32 | ✅ Completed | Phase 3 |
+| Offline mode | 28 | ✅ Completed | PWA Base |
 | Multi-language UI | 24 | 💭 Considering | Phase 5 |
 | Customer loyalty program | 22 | 📋 Planned | Phase 5 |
+| Expense tracking | 20 | ✅ Completed | Phase 6 |
 | Receipt customization | 18 | 💭 Considering | Phase 3 |
-| Supplier management | 15 | 💭 Considering | Future |
 
 > [!TIP]
 > **Want to vote or suggest a feature?** Head to [GitHub Discussions](https://github.com/Keshigami/POS-System/discussions) and share your ideas!

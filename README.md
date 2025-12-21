@@ -19,12 +19,12 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 ## 🚀 Key Features
 
-> **Latest Updates (December 2, 2025)**:
+> **Latest Updates (December 21, 2025)**:
 >
-> - ✨ **Business Type Selection**: Customize POS for 8 different SME types
-> - 💰 **Cost-Plus Pricing**: Auto-calculate selling prices from cost + margin
-> - 📊 **AI Cost Forecasting**: Predict supplier price changes with ML
-> - 💳 **Configurable Service Charges**: Set custom fees per business type
+> - 🛡️ **Inventory Audit Ledger**: Track every stock movement (Sale, Waste, Purchase) for 100% accountability.
+> - 📄 **Batch-based Stock Tracking**: Accurate FIFO and cost tracking using product batches.
+> - 💰 **Expense Auditing**: Track expenses by payment method (Cash, GCash, etc.) and recording user.
+> - 🎨 **UX/UI Overhaul**: 48dp tap targets, visible button borders, and optimized dark mode for tablet usage.
 
 ### 🏪 Business Type Customization
 
@@ -45,9 +45,10 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 
 - **Product CRUD**: Add, edit, and delete products easily.
 - **Cost-Plus Pricing**: Enter cost price and margin, selling price auto-calculates
-- **Stock Tracking**: Real-time inventory updates with low-stock warnings.
-- **Categories**: Organize products for faster access.
-- **Cost Price History**: Track supplier price changes over time
+- **Ledger-Based Tracking**: Real-time inventory updates with a full audit trail of every movement.
+- **Stock Batches**: Track stock by batch for accurate FIFO (First-In-First-Out) and cost analysis.
+- **Low-Stock Warnings**: Visual indicators and warnings for items needing reorder.
+- **Manual Adjustments**: Record "Waste", "Broken", or "Audit" corrections with reason codes.
 
 ### 🍱 Package Management
 
@@ -55,11 +56,12 @@ A modern, web-based Point of Sale (POS) system built specifically for Philippine
 - **Dynamic Pricing**: Auto-calculate package totals based on components.
 - **Stock Management**: Automatically adjust inventory when packages are sold.
 
-### 📊 Analytics Dashboard
+### 📊 Analytics & Accounting
 
 - **Sales Trends**: Daily, weekly, and monthly sales visualizations.
 - **Top Products**: See best-selling items at a glance.
 - **Revenue Tracking**: Monitor total sales and profit margins.
+- **Expense Auditing**: Detailed expense logging with payment method and user tracking.
 - **Inventory Alerts**: Low-stock notifications and reorder suggestions.
 
 ### 🧾 BIR Compliance
@@ -336,13 +338,21 @@ This project follows a phased development approach to deliver value incrementall
 - **Dataset**: 500+ user-product interactions
 - **Cold Start**: Automatic fallback to rule-based
 
-### 🚧 Phase 4: Cloud & Multi-Location (In Progress)
+### ✅ Phase 4: Cloud & Multi-Location (Completed Foundations)
 
-- **Multi-Store Architecture**: Database schema updated to support multiple branches (`Store` model).
-- **Data Isolation**: All products, orders, and users are now linked to specific stores.
-- **Cloud Readiness**: System is ready for PostgreSQL/Supabase migration.
-- **Authentication**: Preparing for Google Login integration.
-- **Mobile App**: Planning Capacitor integration for Android APK.
+- ✅ **Multi-Store Architecture**: Database schema updated to support multiple branches (`Store` model).
+- ✅ **Data Isolation**: All products, orders, and users are now linked to specific stores.
+- 🚧 **Cloud Readiness**: System is ready for PostgreSQL/Supabase migration.
+- 🚧 **Authentication**: Preparing for Google Login integration.
+
+### ✅ Phase 6: Robust Reliability & Inventory Audit (Completed)
+
+- ✅ **Ledger-Based Inventory**: Every stock change is recorded in a `StockMovement` ledger (Audit Trail).
+- ✅ **FIFO Batch Tracking**: Products tracked via `ProductBatch` for accurate cost-of-goods-sold (COGS).
+- ✅ **Purchase Order Workflow**: Standardized receiving logic with automated batch creation.
+- ✅ **Expense Accountability**: Added payment method and user tracking to all business expenses.
+- ✅ **UX/UI Optimization**: Enhanced for 10" Android Tablets with 48dp touch targets and high-contrast borders.
+- ✅ **Light/Dark Mode**: System-wide theme support with auto-detection.
 
 ### 🔮 Phase 5: Advanced Integrations (Future)
 

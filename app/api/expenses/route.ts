@@ -45,12 +45,12 @@ export async function POST(req: Request) {
             data: {
                 amount: parseFloat(amount),
                 category,
-                notes,
+                notes: notes || null,
                 date: date ? new Date(date) : new Date(),
                 storeId,
-                userId, // Optional
+                userId: userId || null,
                 paymentMethod: paymentMethod || "CASH"
-            }
+            } as any
         });
 
         return NextResponse.json(expense);

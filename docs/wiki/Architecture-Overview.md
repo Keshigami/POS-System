@@ -69,10 +69,14 @@ pos-app/
 erDiagram
     Product ||--o{ TransactionItem : contains
     Product ||--o{ PackageItem : includes
+    Product ||--o{ StockMovement : has
+    Product ||--o{ ProductBatch : has
     Package ||--o{ PackageItem : has
     Package ||--o{ TransactionItem : contains
     Transaction ||--o{ TransactionItem : has
     User ||--o{ Transaction : creates
+    User ||--o{ StockMovement : records
+    User ||--o{ Expense : records
     
     Product {
         string id PK
@@ -129,6 +133,36 @@ erDiagram
         string address
         json integrations
     }
+
+    StockMovement {
+        string id PK
+        string productId FK
+        float quantity
+        string type
+        string reason
+        string userId FK
+        datetime createdAt
+    }
+
+    ProductBatch {
+        string id PK
+        string productId FK
+        float quantity
+        float stock
+        float costPrice
+        datetime expiryDate
+        datetime createdAt
+    }
+
+    Expense {
+        string id PK
+        string description
+        float amount
+        string category
+        string paymentMethod
+        string userId FK
+        datetime date
+    }
 ```
 
 ### Key Models
@@ -136,8 +170,10 @@ erDiagram
 #### Product
 
 - Core inventory item
-- Tracks stock levels
+- Tracks global stock levels
 - Categorized for organization
+- Links to StockMovements for audit trail
+- Links to ProductBatches for FIFO tracking
 
 #### Package
 
@@ -156,6 +192,12 @@ erDiagram
 - Global configuration
 - Business details for BIR compliance
 - Integration credentials (encrypted)
+
+#### Stock Audit Layer
+
+- **StockMovement**: The immutable ledger of every inventory change.
+- **ProductBatch**: Individual stock arrivals, enabling accurate FIFO and per-batch margin analysis.
+- **Expense Audit**: Track business costs by user and payment method.
 
 ## Frontend Architecture
 
