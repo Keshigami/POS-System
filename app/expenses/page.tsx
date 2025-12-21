@@ -65,6 +65,7 @@ export default function ExpensesPage() {
     const [category, setCategory] = useState("");
     const [notes, setNotes] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [paymentMethod, setPaymentMethod] = useState("CASH");
 
     // Filter Logic
     const filteredExpenses = expenses?.filter((e) => {
@@ -121,7 +122,8 @@ export default function ExpensesPage() {
                     category,
                     notes,
                     date,
-                    storeId
+                    storeId,
+                    paymentMethod // Added field
                 })
             });
 
@@ -131,6 +133,7 @@ export default function ExpensesPage() {
                 setAmount("");
                 setCategory("");
                 setNotes("");
+                setPaymentMethod("CASH");
                 alert("Expense logged!");
             } else {
                 alert("Failed to log expense");
@@ -191,6 +194,20 @@ export default function ExpensesPage() {
                                 </Select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
+                                <Label className="text-right">Method</Label>
+                                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Payment Method" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="CASH">Cash (Drawer)</SelectItem>
+                                        <SelectItem value="GCASH">GCash</SelectItem>
+                                        <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                                        <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
                                 <Label className="text-right">Date</Label>
                                 <Input
                                     type="date"
@@ -241,6 +258,7 @@ export default function ExpensesPage() {
                             <TableHead>Date</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead>Notes</TableHead>
+                            <TableHead>Method</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -252,6 +270,9 @@ export default function ExpensesPage() {
                                     <Badge variant="outline">{e.category}</Badge>
                                 </TableCell>
                                 <TableCell>{e.notes}</TableCell>
+                                <TableCell>
+                                    <Badge variant="secondary" className="text-xs">{(e as any).paymentMethod || "CASH"}</Badge>
+                                </TableCell>
                                 <TableCell className="text-right font-bold text-destructive">
                                     -₱{e.amount.toFixed(2)}
                                 </TableCell>

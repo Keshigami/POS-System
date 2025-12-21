@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { AuthService } from '@/lib/auth';
 import type { User } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
@@ -14,23 +15,36 @@ export async function POST(request: Request) {
             );
         }
 
-        // Get user by username (for PIN verification)
-        // In a real system, you'd verify the PIN hash against the stored hash
-        const res = await fetch(`/api/auth/users/${username}`);
-        const users = res.ok ? await res.json() : [];
-        
-        const user = users.find((u: User) => u.username === username);
-        
-        if (!user) {
+        // Direct database lookup for user by name
+        const dbUser = await prisma.user.findFirst({
+            where: { name: username },
+            select: {
+                id: true,
+                name: true,
+                pin: true,
+                role: true,
+                storeId: true
+            }
+        });
+
+        if (!dbUser) {
             return NextResponse.json(
                 { error: 'Invalid credentials' },
                 { status: 401 }
             );
         }
 
+        // Check if user has a PIN set
+        if (!dbUser.pin) {
+            return NextResponse.json(
+                { error: 'User PIN not configured' },
+                { status: 400 }
+            );
+        }
+
         // Verify PIN
-        const isValidPIN = await AuthService.verifyPin(pin, user.pin);
-        
+        const isValidPIN = await AuthService.verifyPin(pin, dbUser.pin);
+
         if (!isValidPIN) {
             return NextResponse.json(
                 { error: 'Invalid PIN' },
@@ -38,15 +52,18 @@ export async function POST(request: Request) {
             );
         }
 
+        // Build user object for JWT
+        const user: User = {
+            id: dbUser.id,
+            username: dbUser.name || '',
+            pin: dbUser.pin,
+            role: dbUser.role as User['role'],
+            storeId: dbUser.storeId || '',
+            isActive: true
+        };
+
         // Generate JWT and set session
-        const token = await AuthService.generateJWT({
-            id: user.id,
-            username: user.username,
-            pin: user.pin,
-            role: user.role,
-            storeId: user.storeId,
-            isActive: user.isActive
-        });
+        const token = await AuthService.generateJWT(user);
 
         const response = NextResponse.json({
             success: true,

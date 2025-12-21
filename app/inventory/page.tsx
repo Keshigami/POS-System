@@ -160,6 +160,49 @@ export default function InventoryPage() {
         }
     };
 
+    // Stock Adjustment State
+    const [adjustOpen, setAdjustOpen] = useState(false);
+    const [adjustProduct, setAdjustProduct] = useState<Product | null>(null);
+    const [adjustQty, setAdjustQty] = useState("");
+    const [adjustType, setAdjustType] = useState("ADJUSTMENT");
+    const [adjustReason, setAdjustReason] = useState("");
+
+    const handleAdjustClick = (product: Product) => {
+        setAdjustProduct(product);
+        setAdjustQty("");
+        setAdjustType("ADJUSTMENT");
+        setAdjustReason("");
+        setAdjustOpen(true);
+    };
+
+    const handleConfirmAdjust = async () => {
+        if (!adjustProduct || !adjustQty || !adjustReason) return;
+
+        try {
+            const res = await fetch("/api/inventory/adjust", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: adjustProduct.id,
+                    quantity: parseInt(adjustQty),
+                    type: adjustType,
+                    reason: adjustReason,
+                    userId: "MANUAL_UI" // Placeholder until auth context
+                })
+            });
+
+            if (res.ok) {
+                mutate("/api/products");
+                setAdjustOpen(false);
+                alert("Stock adjusted successfully");
+            } else {
+                alert("Failed to adjust stock");
+            }
+        } catch (e) {
+            alert("Error adjusting stock");
+        }
+    };
+
     return (
         <div className="p-8 space-y-6">
             <div className="flex items-center justify-between">
@@ -270,12 +313,16 @@ export default function InventoryPage() {
                                     )}
                                 </TableCell>
                                 <TableCell className="text-right flex justify-end gap-2">
+                                    {!p.hasVariants && (
+                                        <Button size="sm" variant="outline" onClick={() => handleAdjustClick(p)}>
+                                            <Barcode className="h-4 w-4 mr-1" /> Adjust
+                                        </Button>
+                                    )}
                                     {p.hasVariants && (
                                         <Button size="sm" variant="outline" onClick={() => setManagingVariantId(p.id)}>
                                             <Layers className="h-4 w-4 mr-1" /> Variants
                                         </Button>
                                     )}
-                                    {/* Edit button could go here, omitting for brevity */}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -318,12 +365,65 @@ export default function InventoryPage() {
                                         <TableCell>{v.name}</TableCell>
                                         <TableCell>{v.price ? `₱${v.price}` : "-"}</TableCell>
                                         <TableCell>{v.stock}</TableCell>
-                                        {/* Add Delete/Edit variant actions later */}
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Stock Adjustment Dialog */}
+            <Dialog open={adjustOpen} onOpenChange={setAdjustOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Adjust Stock</DialogTitle>
+                        <DialogDescription>
+                            {adjustProduct?.name} (Current: {adjustProduct?.stock})
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Type</Label>
+                            <Select value={adjustType} onValueChange={setAdjustType}>
+                                <SelectTrigger className="col-span-3">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ADJUSTMENT">Adjustment (+/-)</SelectItem>
+                                    <SelectItem value="WASTE">Waste (Loss)</SelectItem>
+                                    <SelectItem value="RETURN">Return (Restock)</SelectItem>
+                                    <SelectItem value="PURCHASE">Direct Purchase</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Quantity</Label>
+                            <Input
+                                type="number"
+                                className="col-span-3"
+                                value={adjustQty}
+                                onChange={e => setAdjustQty(e.target.value)}
+                                placeholder="Positive or Negative"
+                            />
+                            <span className="text-xs text-muted-foreground col-start-2 col-span-3">
+                                For Waste using "5" means -5 stock.
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Reason</Label>
+                            <Input
+                                className="col-span-3"
+                                value={adjustReason}
+                                onChange={e => setAdjustReason(e.target.value)}
+                                placeholder="e.g. Broken, Expired, Audit"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setAdjustOpen(false)}>Cancel</Button>
+                        <Button onClick={handleConfirmAdjust}>Confirm Adjustment</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

@@ -77,6 +77,8 @@ model User {
   sessions      Session[]
   orders        Order[]
   shifts        Shift[]
+  stockMovements StockMovement[]
+  expenses      Expense[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -131,6 +133,7 @@ model Product {
   hasVariants  Boolean         @default(false)
   variants     ProductVariant[]
   batches      ProductBatch[]
+  stockMovements StockMovement[]
 
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -439,6 +442,9 @@ model Expense {
   category  String   // Rent, Utilities, Salaries, Supplies, Maintenance, Other
   date      DateTime @default(now())
   notes     String?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  paymentMethod String @default("CASH") // CASH, BANK_TRANSFER, GCASH
   storeId   String
   store     Store    @relation(fields: [storeId], references: [id])
   createdAt DateTime @default(now())
@@ -475,4 +481,17 @@ model ProductBatch {
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      // Positive (in) or Negative (out)
+  type        String   // SALE, PURCHASE, ADJUSTMENT, RETURN, WASTE
+  referenceId String?  // OrderID, PO ID, or Shift ID
+  reason      String?  // "Expired", "Broken", "Correction"
+  userId      String?  // Who did this?
+  user        User?    @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 }

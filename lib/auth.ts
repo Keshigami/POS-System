@@ -16,7 +16,13 @@ export interface LoginCredentials {
 }
 
 export class AuthService {
-    private static readonly JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+    private static get JWT_SECRET(): string {
+        const secret = process.env.JWT_SECRET;
+        if (!secret || secret.length < 32) {
+            throw new Error('JWT_SECRET environment variable must be set with at least 32 characters');
+        }
+        return secret;
+    }
     private static readonly TOKEN_EXPIRY = '24h'; // 24 hours
 
     static async hashPin(pin: string): Promise<string> {
@@ -33,12 +39,12 @@ export class AuthService {
     static async verifyPin(pin: string, hashedPin: string): Promise<boolean> {
         // For production, verify against actual hash
         const [hash, salt] = hashedPin.split(':');
-        
+
         if (!hash || !salt) {
             // Fallback for plain text (migration period)
             return pin === hashedPin;
         }
-        
+
         return new Promise((resolve) => {
             crypto.pbkdf2(pin, salt, 10000, 64, 'sha256', (err: Error | null, derivedKey: Buffer) => {
                 if (err) {

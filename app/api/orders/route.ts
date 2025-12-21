@@ -43,8 +43,7 @@ export async function POST(request: Request) {
         // For Guest/Non-Cloud mode, use the first available store if not provided
         let targetStoreId = body.storeId;
         if (!targetStoreId) {
-            // Use type assertion to bypass stale IDE types
-            const defaultStore = await (prisma as any).store.findFirst();
+            const defaultStore = await prisma.store.findFirst();
             targetStoreId = defaultStore?.id;
         }
 
@@ -77,8 +76,6 @@ export async function POST(request: Request) {
         }
 
         // Determine final status
-        // If it's a parked order being saved, status is HELD.
-        // If it's a checkout, status is COMPLETED.
         const orderStatus = status || 'COMPLETED';
 
         // Prepare payment data
@@ -99,7 +96,6 @@ export async function POST(request: Request) {
                     };
                 });
             } else if (paymentMethod) {
-                // Fallback for old requests
                 const amount = parseFloat(total);
                 if (paymentMethod === 'CREDIT') {
                     creditAmount += amount;
@@ -120,8 +116,7 @@ export async function POST(request: Request) {
                     );
                 }
 
-                // Verify customer and limit
-                const customer = await (prisma as any).customer.findUnique({ where: { id: customerId } });
+                const customer = await prisma.customer.findUnique({ where: { id: customerId } });
                 if (!customer) {
                     return NextResponse.json(
                         { error: "Customer not found." },
@@ -138,137 +133,142 @@ export async function POST(request: Request) {
             }
         }
 
-        // Transactional update: Create Order AND Update Stock AND Update Debt
-        // We really should use prisma.$transaction but to keep it simple with the existing structure 
-        // we will do it sequentially (risk of drift but acceptable for this stage). 
-        // Actually, let's try to update debt first if credit.
+        // ============================================================
+        // ATOMIC TRANSACTION: All state changes wrapped for consistency
+        // ============================================================
+        const order = await prisma.$transaction(async (tx) => {
+            // 1. Update customer debt for credit payments
+            if (creditAmount > 0 && customerId) {
+                await tx.customer.update({
+                    where: { id: customerId },
+                    data: { totalDebt: { increment: creditAmount } }
+                });
+            }
 
-        if (creditAmount > 0 && customerId) {
-            await (prisma as any).customer.update({
-                where: { id: customerId },
-                data: { totalDebt: { increment: creditAmount } }
-            });
-        }
+            // 2. Gift Card & Loyalty Deductions
+            for (const payment of paymentRecords) {
+                if (payment.method === 'GIFT_CARD') {
+                    const code = payment.reference;
+                    const giftCard = await tx.giftCard.findUnique({ where: { code } });
 
-        // 2. Gift Card & Loyalty Deductions
-        for (const payment of paymentRecords) {
-            if (payment.method === 'GIFT_CARD') {
-                const code = payment.reference;
-                // Use any to bypass TS check if GiftCard model not yet recognized fully by IDE
-                const giftCard = await (prisma as any).giftCard.findUnique({ where: { code } });
+                    if (!giftCard) throw new Error(`Gift Card invalid: ${code}`);
+                    if (giftCard.currentBalance < payment.amount) throw new Error('Insufficient Gift Card balance');
 
-                if (!giftCard) throw new Error(`Gift Card invalid: ${code}`);
-                if (giftCard.currentBalance < payment.amount) throw new Error(`Insufficient Gift Card balance`);
+                    const newBalance = giftCard.currentBalance - payment.amount;
+                    await tx.giftCard.update({
+                        where: { id: giftCard.id },
+                        data: {
+                            currentBalance: { decrement: payment.amount },
+                            status: newBalance <= 0 ? 'USED' : 'ACTIVE'
+                        }
+                    });
+                } else if (payment.method === 'LOYALTY_POINTS') {
+                    if (!customerId) throw new Error("Customer required for points redemption");
 
-                const newBalance = giftCard.currentBalance - payment.amount;
-                await (prisma as any).giftCard.update({
-                    where: { id: giftCard.id },
-                    data: {
-                        currentBalance: { decrement: payment.amount },
-                        status: newBalance <= 0 ? 'USED' : 'ACTIVE'
+                    const store = await tx.store.findUnique({ where: { id: targetStoreId } });
+                    const pointValue = store?.pointValue || 1.0;
+                    const pointsRequired = Math.ceil(payment.amount / pointValue);
+
+                    const customer = await tx.customer.findUnique({ where: { id: customerId } });
+                    if (!customer || customer.pointsBalance < pointsRequired) {
+                        throw new Error("Insufficient loyalty points");
                     }
-                });
-            } else if (payment.method === 'LOYALTY_POINTS') {
-                if (!customerId) throw new Error("Customer required for points redemption");
 
-                const store = await (prisma as any).store.findUnique({ where: { id: targetStoreId } });
-                const pointValue = store?.pointValue || 1.0;
-                const pointsRequired = Math.ceil(payment.amount / pointValue);
-
-                const customer = await (prisma as any).customer.findUnique({ where: { id: customerId } });
-                if (!customer || customer.pointsBalance < pointsRequired) throw new Error("Insufficient loyalty points");
-
-                await (prisma as any).customer.update({
-                    where: { id: customerId },
-                    data: { pointsBalance: { decrement: pointsRequired } }
-                });
-            }
-        }
-
-        // Decrement Stock using FIFO (First In, First Out) from batches
-        for (const item of items) {
-            let remainingQty = item.quantity;
-
-            // Try FIFO deduction from batches first
-            const batches = await (prisma as any).productBatch.findMany({
-                where: { productId: item.productId, stock: { gt: 0 } },
-                orderBy: [
-                    { expiryDate: 'asc' }, // Earliest expiry first
-                    { receivedDate: 'asc' } // Then oldest received
-                ]
-            });
-
-            for (const batch of batches) {
-                if (remainingQty <= 0) break;
-
-                const deductFromBatch = Math.min(batch.stock, remainingQty);
-                await (prisma as any).productBatch.update({
-                    where: { id: batch.id },
-                    data: { stock: { decrement: deductFromBatch } }
-                });
-                remainingQty -= deductFromBatch;
-            }
-
-            // Always update the main product stock for display purposes
-            await prisma.product.update({
-                where: { id: item.productId },
-                data: { stock: { decrement: item.quantity } }
-            });
-        }
-
-        const order = await (prisma as any).order.create({
-            data: {
-                receiptNumber: nextReceiptNumber,
-                total: parseFloat(total),
-                // subtotal & tax removed as they are not in schema
-                discountAmount: parseFloat(discount || discountAmount || 0),
-                paymentMethod: paymentMethod || (paymentRecords.length > 0 ? paymentRecords[0].method : 'CASH'),
-                status: orderStatus,
-                shiftId: shiftId,
-                storeId: targetStoreId,
-                parkedAt: parkedAt ? new Date(parkedAt) : null,
-                parkedBy: parkedBy,
-                paymentReference: paymentReference,
-                amountPaid: parseFloat(amountPaid || total),
-                customerId: customerId, // Link to customer
-                items: {
-                    create: items.map((item: any) => ({
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        price: item.price,
-                        costPrice: item.costPrice || 0,
-                    })),
-                },
-                payments: {
-                    create: paymentRecords
+                    await tx.customer.update({
+                        where: { id: customerId },
+                        data: { pointsBalance: { decrement: pointsRequired } }
+                    });
                 }
-            },
-            include: {
-                items: true,
-                payments: true,
-                customer: true, // Return customer info
-            },
-        });
+            }
 
-        // Loyalty Points Earning
-        if (orderStatus === 'COMPLETED' && customerId) {
-            const store = await (prisma as any).store.findUnique({ where: { id: targetStoreId } });
-            const earnRate = store?.pointsEarnRate || 0.01; // 1%
-            const pointsEarned = Math.floor(parseFloat(amountPaid || total) * earnRate);
+            // 3. Decrement Stock using FIFO (First In, First Out) from batches
+            for (const item of items) {
+                let remainingQty = item.quantity;
 
-            if (pointsEarned > 0) {
-                await (prisma as any).customer.update({
-                    where: { id: customerId },
-                    data: { pointsBalance: { increment: pointsEarned } }
+                // Try FIFO deduction from batches first
+                const batches = await tx.productBatch.findMany({
+                    where: { productId: item.productId, stock: { gt: 0 } },
+                    orderBy: [
+                        { expiryDate: 'asc' },
+                        { receivedDate: 'asc' }
+                    ]
+                });
+
+                for (const batch of batches) {
+                    if (remainingQty <= 0) break;
+
+                    const deductFromBatch = Math.min(batch.stock, remainingQty);
+                    await tx.productBatch.update({
+                        where: { id: batch.id },
+                        data: { stock: { decrement: deductFromBatch } }
+                    });
+                    remainingQty -= deductFromBatch;
+                }
+
+                // Always update the main product stock for display purposes
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { decrement: item.quantity } }
                 });
             }
-        }
+
+            // 4. Create the Order with items and payments
+            const createdOrder = await tx.order.create({
+                data: {
+                    receiptNumber: nextReceiptNumber,
+                    total: parseFloat(total),
+                    discountAmount: parseFloat(discount || discountAmount || 0),
+                    paymentMethod: paymentMethod || (paymentRecords.length > 0 ? paymentRecords[0].method : 'CASH'),
+                    status: orderStatus,
+                    shiftId: shiftId,
+                    storeId: targetStoreId,
+                    parkedAt: parkedAt ? new Date(parkedAt) : null,
+                    parkedBy: parkedBy,
+                    paymentReference: paymentReference,
+                    amountPaid: parseFloat(amountPaid || total),
+                    customerId: customerId,
+                    items: {
+                        create: items.map((item: any) => ({
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            price: item.price,
+                            costPrice: item.costPrice || 0,
+                        })),
+                    },
+                    payments: {
+                        create: paymentRecords
+                    }
+                },
+                include: {
+                    items: true,
+                    payments: true,
+                    customer: true,
+                },
+            });
+
+            // 5. Loyalty Points Earning (still within transaction)
+            if (orderStatus === 'COMPLETED' && customerId) {
+                const store = await tx.store.findUnique({ where: { id: targetStoreId } });
+                const earnRate = store?.pointsEarnRate || 0.01;
+                const pointsEarned = Math.floor(parseFloat(amountPaid || total) * earnRate);
+
+                if (pointsEarned > 0) {
+                    await tx.customer.update({
+                        where: { id: customerId },
+                        data: { pointsBalance: { increment: pointsEarned } }
+                    });
+                }
+            }
+
+            return createdOrder;
+        });
 
         return NextResponse.json(order);
     } catch (error) {
         console.error("Order creation error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to create order";
         return NextResponse.json(
-            { error: "Failed to create order" },
+            { error: errorMessage },
             { status: 500 }
         );
     }

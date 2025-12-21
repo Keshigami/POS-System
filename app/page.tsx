@@ -756,7 +756,7 @@ export default function POSPage() {
                         {getRemainingBalance() > 0 && (
                             <div className="flex gap-2">
                                 <select
-                                    className="flex h-10 w-1/3 items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="flex h-12 min-h-[48px] w-1/3 items-center justify-between rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-background dark:bg-gray-800 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring dark:text-white"
                                     value={splitPaymentMethod}
                                     onChange={(e) => setSplitPaymentMethod(e.target.value)}
                                 >

@@ -35,7 +35,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { amount, category, notes, date, storeId } = body;
+        const { amount, category, notes, date, storeId, userId, paymentMethod } = body;
 
         if (!amount || !category || !storeId) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -47,7 +47,9 @@ export async function POST(req: Request) {
                 category,
                 notes,
                 date: date ? new Date(date) : new Date(),
-                storeId
+                storeId,
+                userId, // Optional
+                paymentMethod: paymentMethod || "CASH"
             }
         });
 
